@@ -14,7 +14,8 @@ public class DB_Reader implements Database_Reader{
     public DB_Reader(){
         this.db_username = "root";
         this.db_password = "mysql";
-        this.url = "jdbc:mysql://localhost:3306/time_management_system";
+        this.url = "jdbc:mysql://google/time_management_system?cloudSqlInstance=tmtproject-148101:us-central1:timemanagementsystem&socketFactory=com.google.cloud.sql.mysql.SocketFactory";
+        //this.url = "jdbc:mysql://localhost:3306/time_management_system";
     }
 
     /**
@@ -31,7 +32,7 @@ public class DB_Reader implements Database_Reader{
 
             Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
 
-            PreparedStatement stmt = reader_connection.prepareStatement("select * from login_system where user_name = ?");
+            PreparedStatement stmt = reader_connection.prepareStatement("select * from login where username = ?");
             stmt.setString(1, input_username);
 
             ResultSet queryResult = stmt.executeQuery();
@@ -39,7 +40,7 @@ public class DB_Reader implements Database_Reader{
             /* Check if statement contains rows with matching db_username */
             while (queryResult.next())
                 if (queryResult.getString("password").equals(input_password))
-                    return queryResult.getInt("employee_number");
+                    return queryResult.getInt("EmployeeID");
 
             reader_connection.close();
             return -1;
@@ -47,13 +48,14 @@ public class DB_Reader implements Database_Reader{
         } catch (ClassNotFoundException e) {
             /* JAR may not be configured right or JDBC may not be working */
             e.printStackTrace();
+            return -2;
         } catch (SQLException e) {
             /* Catch all for errors I have not yet encountered */
             e.printStackTrace();
-        } finally {
+            return -2;
+        } finally{
             if (reader_connection != null)
                 try { reader_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
-            return -2;
         }
     }
 
@@ -192,14 +194,16 @@ public class DB_Reader implements Database_Reader{
     @Override
     public ArrayList<EmployeeLog> employeeWorkHours(ArrayList<Employee> list){
         ArrayList<EmployeeLog> timeLogs = new ArrayList<>();
+        int paramNum = 1;
         try {
             for (Employee currentEmployee: list) {
                 Class.forName("com.mysql.jdbc.Driver");
 
                 Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
                 String query = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE EmployeeID = ?";
+
                 PreparedStatement stmt = reader_connection.prepareStatement(query);
-                stmt.setInt(1, currentEmployee.getEmployeeNumber());
+                stmt.setInt(paramNum, currentEmployee.getEmployeeNumber());
 
                 ResultSet queryResult = stmt.executeQuery();
 

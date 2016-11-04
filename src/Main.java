@@ -1,12 +1,11 @@
+import javax.swing.*;
 import java.sql.*;
 import java.util.ArrayList;
 
-public class Main {
+public class Main extends JApplet {
 
-    public static void main(String args[]){
-
-        DB_Reader readOne = new DB_Reader();
-
-        readOne.allEmployees();
+    public static void main(String [] args){
+        //GUI_Layout d = new GUI_Layout();
+        ClockinDev d = new ClockinDev();
     }
 }

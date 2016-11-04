@@ -16,5 +16,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="com.google.cloud.sql:mysql-socket-factory:1.0.2" level="project" />
   </component>
 </module>
