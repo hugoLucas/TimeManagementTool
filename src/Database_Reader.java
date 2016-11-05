@@ -13,7 +13,7 @@ public interface Database_Reader {
      * @param input_username    username retrieved by GUI page
      * @return  Employee number of user if login is valid, -1 if invalid, -2 if other errors
      */
-    int login_user(String input_password, String input_username);
+    int[] login_user(String input_password, String input_username);
 
     /**
      * Given a valid employee identification number, method will return a list of
@@ -50,4 +50,11 @@ public interface Database_Reader {
      * @return list of employees
      */
     ArrayList<Employee> allEmployees();
+
+    /**
+     * Determines if an employee should clock-in or out of work
+     * @param employee_number employee identifier
+     * @return 1 if employee is already clocked in , 0 if otherwise
+     *//*
+    int employeeWorkStatus(int employee_number);*/
 }

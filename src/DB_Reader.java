@@ -26,33 +26,49 @@ public class DB_Reader implements Database_Reader{
      * @param input_username    username retrieved by GUI page
      * @return  Employee number of user if login is valid, -1 if invalid, -2 if other errors
      */
-    public int login_user(String input_password, String input_username) {
+    public int[] login_user(String input_password, String input_username) {
+        int[] result = {-1,-1};
         try {
+            /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-
             Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
 
+            /* Prepare query to database */
             PreparedStatement stmt = reader_connection.prepareStatement("select * from login where username = ?");
             stmt.setString(1, input_username);
 
+            /* Execute statement */
             ResultSet queryResult = stmt.executeQuery();
 
             /* Check if statement contains rows with matching db_username */
             while (queryResult.next())
                 if (queryResult.getString("password").equals(input_password))
-                    return queryResult.getInt("EmployeeID");
+                    result[0] = queryResult.getInt("EmployeeID");
+
+            if(result[0] > 0) {
+                stmt = reader_connection.prepareStatement("select workstatus from employee where employeeid= ?");
+                stmt.setInt(1, result[0]);
+
+                /* Execute statement */
+                queryResult = stmt.executeQuery();
+
+                while (queryResult.next())
+                    result[1] = queryResult.getInt("workstatus");
+            }
 
             reader_connection.close();
-            return -1;
-
+            return result;
         } catch (ClassNotFoundException e) {
             /* JAR may not be configured right or JDBC may not be working */
             e.printStackTrace();
-            return -2;
+            result[0] = -2;
+            return result;
         } catch (SQLException e) {
             /* Catch all for errors I have not yet encountered */
             e.printStackTrace();
-            return -2;
+            result[0] = -2;
+            return result;
         } finally{
             if (reader_connection != null)
                 try { reader_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
@@ -276,5 +292,92 @@ public class DB_Reader implements Database_Reader{
         }
     }
 
+    public EmployeeProjectTaskMap projectTaskMap(int employee_number) {
+        EmployeeProjectTaskMap projTask = new EmployeeProjectTaskMap();
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            /* Prepares query for get all tasks for a given employee */
+            String query = "SELECT * FROM tasks";
+            PreparedStatement taskStatement = reader_connection.prepareStatement(query);
+            ResultSet taskQueryResult = taskStatement.executeQuery();
+
+            while(taskQueryResult.next()){
+                /* Create Task object from query results*/
+                int taskID = taskQueryResult.getInt("TaskID");
+                EmployeeTask tk = new EmployeeTask(taskQueryResult.getString("TaskName"), taskID);
+
+                query = "SELECT * FROM projects WHERE ProjectID = ( SELECT projectID FROM project_task_map WHERE TaskID = ?)";
+                PreparedStatement projectStatement = reader_connection.prepareStatement(query);
+                projectStatement.setInt(1, taskID);
+                ResultSet projectQueryResult = projectStatement.executeQuery();
+
+                while(projectQueryResult.next()){
+                    EmployeeProject emp = new EmployeeProject(projectQueryResult.getString("projectname"), projectQueryResult.getInt("projectid"));
+                    projTask.addMapping(emp, tk);
+                }
+            }
+
+            return projTask;
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (reader_connection != null)
+                try {
+                    reader_connection.close();
+                } catch (Exception e) { /* Ignore this I guess! */}
+        }
+    }
+
+    public int[] getCurrentEmployeeTaskAndProject(int employeeID){
+        int[] ret = {0,0};
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            /* Prepares query to get task in row with null timeout*/
+            String query = "SELECT TaskID FROM time_logs WHERE TimeOut IS NULL AND EmployeeID = ?";
+            PreparedStatement stmt = reader_connection.prepareStatement(query);
+            stmt.setInt(1, employeeID);
+
+            ResultSet queryRes = stmt.executeQuery();
+
+            if(queryRes.next())
+                ret[0] = queryRes.getInt("TaskID");
+
+            /* Get project that has task as assigned task */
+            query = "SELECT ProjectID FROM project_task_map WHERE TaskID = ?";
+            stmt = reader_connection.prepareStatement(query);
+            stmt.setInt(1, ret[0]);
+
+            queryRes = stmt.executeQuery();
+            if(queryRes.next())
+                ret[1] = queryRes.getInt("ProjectID");
+
+            return ret;
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (reader_connection != null)
+                try {
+                    reader_connection.close();
+                } catch (Exception e) { /* Ignore this I guess! */}
+        }
+    }
 
 }

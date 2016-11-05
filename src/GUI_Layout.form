@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="GUI_Layout">
   <grid id="27dc6" binding="cardStack" layout-manager="CardLayout" hgap="0" vgap="0">
     <constraints>
-      <xy x="20" y="20" width="567" height="400"/>
+      <xy x="20" y="20" width="567" height="421"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -71,12 +71,12 @@
       <grid id="fc465" binding="ClockinDev" layout-manager="GridLayoutManager" row-count="6" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <card name="ClockIn"/>
+          <card name="ClockInDev"/>
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
-          <component id="cbb36" class="javax.swing.JLabel">
+          <component id="cbb36" class="javax.swing.JLabel" binding="clockinDevTimer">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -84,7 +84,7 @@
               <text value="TIMER"/>
             </properties>
           </component>
-          <component id="f6c4f" class="javax.swing.JComboBox" binding="comboBox1" default-binding="true">
+          <component id="f6c4f" class="javax.swing.JComboBox" binding="clockInDevProjectSelector">
             <constraints>
               <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -92,7 +92,7 @@
               <model/>
             </properties>
           </component>
-          <component id="ae791" class="javax.swing.JComboBox" binding="comboBox2" default-binding="true">
+          <component id="ae791" class="javax.swing.JComboBox" binding="clockInDevTaskSelector">
             <constraints>
               <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -114,7 +114,7 @@
               <text value="Select Task"/>
             </properties>
           </component>
-          <component id="6e9bd" class="javax.swing.JButton" binding="clockInButton" default-binding="true">
+          <component id="6e9bd" class="javax.swing.JButton" binding="clockInDevClockInButton">
             <constraints>
               <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -122,12 +122,12 @@
               <text value="ClockIn"/>
             </properties>
           </component>
-          <component id="37564" class="javax.swing.JButton" binding="systemButton" default-binding="true">
+          <component id="37564" class="javax.swing.JButton" binding="clockInDevTimeSheetButton">
             <constraints>
               <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="System"/>
+              <text value="Timesheets"/>
             </properties>
           </component>
         </children>
@@ -135,7 +135,7 @@
       <grid id="ff6f4" binding="ClockoutDev" layout-manager="GridLayoutManager" row-count="6" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <card name="Card1"/>
+          <card name="ClockOutDev"/>
         </constraints>
         <properties/>
         <border type="none"/>
@@ -148,7 +148,7 @@
               <text value="Selected Project: "/>
             </properties>
           </component>
-          <component id="164b8" class="javax.swing.JLabel">
+          <component id="164b8" class="javax.swing.JLabel" binding="clockOutDevCurrentProject">
             <constraints>
               <grid row="1" column="2" row-span="1" col-span="4" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -164,7 +164,7 @@
               <text value="Selected Task: "/>
             </properties>
           </component>
-          <component id="f0d0c" class="javax.swing.JLabel">
+          <component id="f0d0c" class="javax.swing.JLabel" binding="clockOutDevCurrentTask">
             <constraints>
               <grid row="3" column="2" row-span="1" col-span="4" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -172,7 +172,7 @@
               <text value="TASK"/>
             </properties>
           </component>
-          <component id="15363" class="javax.swing.JLabel">
+          <component id="15363" class="javax.swing.JLabel" binding="clockOutDevClock">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="7" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -180,15 +180,15 @@
               <text value="CLOCK"/>
             </properties>
           </component>
-          <component id="a5738" class="javax.swing.JButton" binding="systemButton1" default-binding="true">
+          <component id="a5738" class="javax.swing.JButton" binding="clockOutDevTimeSheetButton">
             <constraints>
               <grid row="5" column="4" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="System"/>
+              <text value="Timesheet"/>
             </properties>
           </component>
-          <component id="e3706" class="javax.swing.JButton" binding="clockOutButton" default-binding="true">
+          <component id="e3706" class="javax.swing.JButton" binding="clockOutDevClockOutButton">
             <constraints>
               <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -224,6 +224,154 @@
               <grid row="5" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
+        </children>
+      </grid>
+      <grid id="581a8" binding="TimesheetDev" layout-manager="GridLayoutManager" row-count="16" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <card name="timeSheetDev"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <hspacer id="537f9">
+            <constraints>
+              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
+          <vspacer id="51955">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </vspacer>
+          <vspacer id="3df39">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </vspacer>
+          <component id="e4904" class="javax.swing.JLabel" binding="timeSheetLabel">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Developer Timesheet"/>
+            </properties>
+          </component>
+          <component id="49803" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Project:"/>
+            </properties>
+          </component>
+          <component id="fd1a1" class="javax.swing.JComboBox" binding="timeSheetDevProjectSelector">
+            <constraints>
+              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <model/>
+            </properties>
+          </component>
+          <hspacer id="7a2b2">
+            <constraints>
+              <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
+          <component id="181d6" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Task:"/>
+            </properties>
+          </component>
+          <component id="f71df" class="javax.swing.JComboBox" binding="timeSheetDevTaskSelector">
+            <constraints>
+              <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+          </component>
+          <hspacer id="cc3e2">
+            <constraints>
+              <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
+          <component id="fbab8" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Interval:"/>
+            </properties>
+          </component>
+          <component id="90857" class="javax.swing.JComboBox" binding="timeSheetDevIntervalSelector">
+            <constraints>
+              <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+          </component>
+          <hspacer id="f292">
+            <constraints>
+              <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
+          <component id="e7725" class="javax.swing.JButton" binding="timeSheetDevGenerateButton">
+            <constraints>
+              <grid row="12" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Generate Timesheet"/>
+            </properties>
+          </component>
+          <component id="85fda" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="bf4e4" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="bb1d3" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="29327" class="javax.swing.JButton" binding="backToClockInButton" default-binding="true">
+            <constraints>
+              <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Back To Clock In Screen"/>
+            </properties>
+          </component>
+          <component id="968bf" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="8a72c" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="15" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
         </children>
       </grid>
     </children>
