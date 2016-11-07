@@ -18,5 +18,9 @@ public class EmployeeLog {
         this.taskID = id;
     }
 
+    public String printLog(){
+        String out = String.format("IN: %s OUT: %s DATE: %s TASK: %d",clockIn.toString(), clockOut.toString(), logDate.toString(), taskID);
 
+        return out;
+    }
 }

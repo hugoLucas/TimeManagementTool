@@ -27,7 +27,7 @@ public class DB_Reader implements Database_Reader{
      * @return  Employee number of user if login is valid, -1 if invalid, -2 if other errors
      */
     public int[] login_user(String input_password, String input_username) {
-        int[] result = {-1,-1};
+        int[] result = {-1,-1, -1};
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
@@ -35,29 +35,38 @@ public class DB_Reader implements Database_Reader{
             /* Boiler plate to create class and establish connection */
 
             /* Prepare query to database */
-            PreparedStatement stmt = reader_connection.prepareStatement("select * from login where username = ?");
+            PreparedStatement stmt = reader_connection.prepareStatement("SELECT employee.employeeID, employee.Manager, employee.WorkStatus, login.Password FROM employee, login WHERE login.Username = ?");
             stmt.setString(1, input_username);
 
             /* Execute statement */
             ResultSet queryResult = stmt.executeQuery();
 
             /* Check if statement contains rows with matching db_username */
-            while (queryResult.next())
-                if (queryResult.getString("password").equals(input_password))
+            while (queryResult.next()){
+                if (queryResult.getString("password").equals(input_password)) {
+                    result[0] = queryResult.getInt("EmployeeID");
+                    result[1] = queryResult.getInt("workstatus");
+                    result[2] = queryResult.getInt("manager");
+
+                    break;
+                }
+            }
+            /*    if (queryResult.getString("password").equals(input_password))
                     result[0] = queryResult.getInt("EmployeeID");
 
             if(result[0] > 0) {
-                stmt = reader_connection.prepareStatement("select workstatus from employee where employeeid= ?");
+                stmt = reader_connection.prepareStatement("select workstatus, manager from employee where employeeid= ?");
                 stmt.setInt(1, result[0]);
 
-                /* Execute statement */
+                *//* Execute statement *//*
                 queryResult = stmt.executeQuery();
 
-                while (queryResult.next())
+                while (queryResult.next()) {
                     result[1] = queryResult.getInt("workstatus");
-            }
+                    result[2] = queryResult.getInt("manager");
+                }
+            }*/
 
-            reader_connection.close();
             return result;
         } catch (ClassNotFoundException e) {
             /* JAR may not be configured right or JDBC may not be working */
@@ -380,4 +389,74 @@ public class DB_Reader implements Database_Reader{
         }
     }
 
+    /**
+     * Generates TimeLog objects that will constitute a single employees timesheet.
+     * TaskID = 0 when the "All Tasks" option has been selected, ProjectID = 0 and TaskID = 0
+     * when the "All Projects" option has been selected.
+     * @param employeeNumber
+     * @param taskID
+     * @param start
+     * @param end
+     * @return
+     */
+    public ArrayList<EmployeeLog> genEmployeeTimeSheet(int employeeNumber, int projID,  int taskID, Date start, Date end){
+        ArrayList<EmployeeLog>  records = new ArrayList<>();
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            /* Prepares query to get task in row with null timeout*/
+            String query;
+            if(projID == 0){
+                /* Select all rows that for the employee */
+                query = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ?";
+            }else if(taskID == 0){
+                /* Select all tasks associated with a given project */
+                query = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID IN ( SELECT TaskID FROM project_task_map WHERE ProjectID = ?)";
+            }else{
+                /* Select all logs for a given task and project */
+                query = "SELECT TimeIn, TimeOut, Date FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID = ?";
+            }
+
+            /* Prepare query and set parameters in accordance with function inputs */
+            int index = 1;
+            PreparedStatement stmt = reader_connection.prepareStatement(query);
+            stmt.setDate(index++, end);
+            stmt.setDate(index++, start);
+            stmt.setInt(index++, employeeNumber);
+            if(taskID == 0 && projID != 0)
+                stmt.setInt(index++, projID);
+            else if(projID != 0)
+                stmt.setInt(index++, taskID);
+
+            /* Execute and store query results */
+            ResultSet queryRes = stmt.executeQuery();
+            while(queryRes.next()){
+                Time in = queryRes.getTime("TimeIn");
+                Time out = queryRes.getTime("TimeOut");
+                Date d = queryRes.getDate("Date");
+
+                if(projID == 0 || taskID == 0) {
+                    int tkID = queryRes.getInt("TaskID");
+                    records.add(new EmployeeLog(in, out, d, tkID));
+                }else
+                    records.add(new EmployeeLog(in, out, d, taskID));
+            }
+
+            return records;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (reader_connection != null)
+                try {
+                    reader_connection.close();
+                } catch (Exception e) { /* Ignore this I guess! */}
+        }
+    }
 }

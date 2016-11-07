@@ -8,10 +8,12 @@ public class userLogIn {
 
     private int workStatus;
     private int employeeNumber;
+    private int managerStatus;
 
     public userLogIn(){
         this.workStatus = -1;
         this.employeeNumber = -1;
+        this.managerStatus = 0;
     }
 
     public void login(String username, String password){
@@ -26,11 +28,12 @@ public class userLogIn {
         else{
             employeeNumber = loginResult[0];
             workStatus = loginResult[1];
+            managerStatus = loginResult[2];
         }
     }
 
     public int[] results(){
-        int retArray[] = {this.employeeNumber, this.workStatus};
+        int retArray[] = {this.employeeNumber, this.workStatus, this.managerStatus};
         return retArray;
     }
 
