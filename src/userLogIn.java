@@ -9,11 +9,13 @@ public class userLogIn {
     private int workStatus;
     private int employeeNumber;
     private int managerStatus;
+    private ArrayList<Employee> list;
 
     public userLogIn(){
         this.workStatus = -1;
         this.employeeNumber = -1;
         this.managerStatus = 0;
+        this.list = null;
     }
 
     public void login(String username, String password){
@@ -70,4 +72,17 @@ public class userLogIn {
         return IDs;
     }
 
+    public ArrayList<Employee> getAllEmployees(){
+        DB_Reader reader = new DB_Reader();
+        list = reader.allEmployees();
+        return list;
+    }
+
+    public int getEmployeeNumberByName(String name){
+        if (list != null)
+            for(Employee e: list)
+                if(e.getName().equals(name))
+                    return e.getEmployeeNumber();
+        return -1;
+    }
 }

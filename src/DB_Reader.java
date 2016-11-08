@@ -14,8 +14,8 @@ public class DB_Reader implements Database_Reader{
     public DB_Reader(){
         this.db_username = "root";
         this.db_password = "mysql";
-        this.url = "jdbc:mysql://google/time_management_system?cloudSqlInstance=tmtproject-148101:us-central1:timemanagementsystem&socketFactory=com.google.cloud.sql.mysql.SocketFactory";
-        //this.url = "jdbc:mysql://localhost:3306/time_management_system";
+        //this.url = "jdbc:mysql://google/time_management_system?cloudSqlInstance=tmtproject-148101:us-central1:timemanagementsystem&socketFactory=com.google.cloud.sql.mysql.SocketFactory";
+        this.url = "jdbc:mysql://localhost:3306/time_management_system";
     }
 
     /**
@@ -443,6 +443,86 @@ public class DB_Reader implements Database_Reader{
                     records.add(new EmployeeLog(in, out, d, tkID));
                 }else
                     records.add(new EmployeeLog(in, out, d, taskID));
+            }
+
+            return records;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (reader_connection != null)
+                try {
+                    reader_connection.close();
+                } catch (Exception e) { /* Ignore this I guess! */}
+        }
+    }
+
+    public ArrayList<EmployeeLog> genManagerTimeSheet(int employeeNumber, int projID,  int taskID, Date start, Date end){
+        ArrayList<EmployeeLog>  records = new ArrayList<>();
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            /* Prepares query to get task in row with null timeout*/
+            String query;
+            if(projID == 0 && employeeNumber != 0){
+                /* Select all rows that for the employee */
+                query = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ?";
+            }else if(projID == 0 && employeeNumber == 0){
+                query = "SELECT TimeIn, TimeOut, Date, TaskID, EmployeeID FROM time_logs WHERE (Date BETWEEN ? AND ?)";
+            }else if(taskID == 0 && employeeNumber != 0){
+                /* Select all tasks associated with a given project */
+                query = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID IN ( SELECT TaskID FROM project_task_map WHERE ProjectID = ?)";
+            }else if(taskID == 0 && employeeNumber == 0){
+                query = "SELECT TimeIn, TimeOut, Date, TaskID, EmployeeID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND TaskID IN ( SELECT TaskID FROM project_task_map WHERE ProjectID = ?)";
+            }else if (employeeNumber == 0){
+                /* Select all logs for a given task and project */
+                query = "SELECT TimeIn, TimeOut, Date, EmployeeID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND TaskID = ?";
+            }else{
+                query = "SELECT TimeIn, TimeOut, Date FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID = ?";
+            }
+
+            /* Prepare query and set parameters in accordance with function inputs */
+            int index = 1;
+            PreparedStatement stmt = reader_connection.prepareStatement(query);
+            stmt.setDate(index++, end);
+            stmt.setDate(index++, start);
+            if(employeeNumber != 0)
+                stmt.setInt(index++, employeeNumber);
+            if(taskID == 0 && projID != 0)
+                stmt.setInt(index++, projID);
+            else if(projID != 0)
+                stmt.setInt(index++, taskID);
+
+            /* Execute and store query results */
+            ResultSet queryRes = stmt.executeQuery();
+            while(queryRes.next()){
+                Time in = queryRes.getTime("TimeIn");
+                Time out = queryRes.getTime("TimeOut");
+                Date d = queryRes.getDate("Date");
+
+                int eID = employeeNumber;
+                if(employeeNumber == 0)
+                    eID = queryRes.getInt("EmployeeID");
+
+                if(projID == 0 || taskID == 0) {
+                    int tkID = queryRes.getInt("TaskID");
+
+                    if(eID == 0)
+                        records.add(new EmployeeLog(in, out, d, tkID));
+                    else
+                        records.add(new EmployeeLog(in, out, d, tkID, eID));
+                }else
+                    if(eID == 0)
+                        records.add(new EmployeeLog(in, out, d, taskID));
+                    else
+                        records.add(new EmployeeLog(in, out, d, taskID, eID));
+
             }
 
             return records;

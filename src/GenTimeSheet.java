@@ -44,9 +44,20 @@ public class GenTimeSheet {
         DB_Reader reader = new DB_Reader();
         ArrayList<EmployeeLog> recs = reader.genEmployeeTimeSheet(employeeID, projectIDSeleted, taskIDSelected, start, end);
 
-        if(recs.size() > 0) {
+        return this.listToBuilder(recs);
+    }
+
+    private StringBuilder createManagerReport(){
+        DB_Reader reader = new DB_Reader();
+        ArrayList<EmployeeLog> recs = reader.genManagerTimeSheet(employeeID, projectIDSeleted, taskIDSelected, start, end);
+
+        return this.listToBuilder(recs);
+    }
+
+    private StringBuilder listToBuilder(ArrayList<EmployeeLog> lis){
+        if(lis.size() > 0) {
             StringBuilder out = new StringBuilder();
-            for (EmployeeLog el : recs) {
+            for (EmployeeLog el : lis) {
                 out.append(el.printLog());
                 out.append(System.getProperty("line.separator"));
             }
@@ -79,9 +90,5 @@ public class GenTimeSheet {
 
         this.start = new Date(intervalStartTime);
         this.end = new Date(intervalEndTime);
-    }
-
-    private StringBuilder createManagerReport(){
-        return null;
     }
 }

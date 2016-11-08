@@ -16,4 +16,8 @@ public class Employee {
     public int getEmployeeNumber(){
         return this.employeeNumber;
     }
+
+    public String getName(){
+        return (lastName + ", " + firstName);
+    }
 }
