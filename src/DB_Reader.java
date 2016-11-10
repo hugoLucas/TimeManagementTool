@@ -51,21 +51,6 @@ public class DB_Reader implements Database_Reader{
                     break;
                 }
             }
-            /*    if (queryResult.getString("password").equals(input_password))
-                    result[0] = queryResult.getInt("EmployeeID");
-
-            if(result[0] > 0) {
-                stmt = reader_connection.prepareStatement("select workstatus, manager from employee where employeeid= ?");
-                stmt.setInt(1, result[0]);
-
-                *//* Execute statement *//*
-                queryResult = stmt.executeQuery();
-
-                while (queryResult.next()) {
-                    result[1] = queryResult.getInt("workstatus");
-                    result[2] = queryResult.getInt("manager");
-                }
-            }*/
 
             return result;
         } catch (ClassNotFoundException e) {

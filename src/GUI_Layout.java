@@ -64,6 +64,23 @@ public class GUI_Layout extends JFrame{
     private JComboBox timeSheetManIntervalSelector;
     private JButton timeSheetManGenerateTimeSheetButton;
     private JButton timeSheetManBackButton;
+    private JPanel SystemMan;
+    private JTabbedPane systemManAddTask;
+    private JPanel systemManAddEmployee;
+    private JPanel systemManCreateTask;
+    private JPanel systemManAddProject;
+    private JTextField systemManLastNameTextField;
+    private JTextField systemManFirstNameTextField;
+    private JTextField systemManHireDateTextField;
+    private JComboBox systemManGroupSelector;
+    private JButton systemManAPAddProject;
+    private JButton systemManBackButton;
+    private JComboBox systemManATProjectSelector;
+    private JTextField systemManATTaskName;
+    private JButton systemManATAddTask;
+    private JButton systemManATBackButton;
+    private JTextField systemManCPProjectName;
+    private JButton systemManCPCreateProject;
 
     public GUI_Layout(){
         setContentPane(cardStack);
@@ -74,8 +91,7 @@ public class GUI_Layout extends JFrame{
         setResizable(false);
         setVisible(true);
 
-        LoginButtonListener login_listener = new LoginButtonListener();
-        loginLoginButton.addActionListener(login_listener);
+        loginLoginButton.addActionListener(new LoginButtonListener());
 
         ClockInButtonListener clockin_listener = new ClockInButtonListener();
         clockInDevClockInButton.addActionListener(clockin_listener);
@@ -94,10 +110,17 @@ public class GUI_Layout extends JFrame{
         BackButton back_listener = new BackButton();
         timeSheetDevBackButton.addActionListener(back_listener);
         timeSheetManBackButton.addActionListener(back_listener);
+        systemManBackButton.addActionListener(back_listener);
+        systemManATBackButton.addActionListener(back_listener);
 
         GenTimeSheetButton timeSheetButton_listener = new GenTimeSheetButton();
         timeSheetDevGenerateButton.addActionListener(timeSheetButton_listener);
         timeSheetManGenerateTimeSheetButton.addActionListener(timeSheetButton_listener);
+
+        SystemButton systemButton_listener = new SystemButton();
+        clockInManSystemButton.addActionListener(systemButton_listener);
+        clockOutManSystemButton.addActionListener(systemButton_listener);
+
     }
 
     public void setLoginDropdowns(){
@@ -109,9 +132,11 @@ public class GUI_Layout extends JFrame{
         if(managerStatus == 1){ projectProxy = clockInManProjectSelector; taskProxy = clockInManTaskSelector; }
         else{ projectProxy = clockInDevProjectSelector; taskProxy = clockInDevTaskSelector; }
 
+        projectProxy.removeAllItems();
         for(String proj: projDropDown)
             projectProxy.addItem(proj);
 
+        taskProxy.removeAllItems();
         for(String task: taskDropDown)
             taskProxy.addItem(task);
 
@@ -201,30 +226,34 @@ public class GUI_Layout extends JFrame{
                 if(e.getSource() == timeSheetDevProjectSelector) {
                     String projectSelected = (String) timeSheetDevProjectSelector.getSelectedItem();
 
-                    if(projectSelected.equals("All Projects")){
-                        timeSheetDevTaskSelector.removeAllItems();
-                        timeSheetDevTaskSelector.addItem("All Tasks");
-                    }else{
-                        timeSheetDevTaskSelector.removeAllItems();
+                    if (projectSelected!=null) {
+                        if(projectSelected.equals("All Projects")){
+                            timeSheetDevTaskSelector.removeAllItems();
+                            timeSheetDevTaskSelector.addItem("All Tasks");
+                        }else{
+                            timeSheetDevTaskSelector.removeAllItems();
 
-                        for (String taskName : logInObj.tasksInProject(projectSelected, map))
-                            timeSheetDevTaskSelector.addItem(taskName);
+                            for (String taskName : logInObj.tasksInProject(projectSelected, map))
+                                timeSheetDevTaskSelector.addItem(taskName);
 
-                        timeSheetDevTaskSelector.addItem("All Tasks");
+                            timeSheetDevTaskSelector.addItem("All Tasks");
+                        }
                     }
-                }else{
+                }else if(e.getSource() == timeSheetManProjectSelector){
                     String projectSelected = (String) timeSheetManProjectSelector.getSelectedItem();
 
-                    if(projectSelected.equals("All Projects")){
-                        timeSheetManTaskSelector.removeAllItems();
-                        timeSheetManTaskSelector.addItem("All Tasks");
-                    }else{
-                        timeSheetManTaskSelector.removeAllItems();
+                    if (projectSelected != null) {
+                        if(projectSelected.equals("All Projects")){
+                            timeSheetManTaskSelector.removeAllItems();
+                            timeSheetManTaskSelector.addItem("All Tasks");
+                        }else{
+                            timeSheetManTaskSelector.removeAllItems();
 
-                        for (String taskName : logInObj.tasksInProject(projectSelected, map))
-                            timeSheetManTaskSelector.addItem(taskName);
+                            for (String taskName : logInObj.tasksInProject(projectSelected, map))
+                                timeSheetManTaskSelector.addItem(taskName);
 
-                        timeSheetManTaskSelector.addItem("All Tasks");
+                            timeSheetManTaskSelector.addItem("All Tasks");
+                        }
                     }
                 }
             }
@@ -234,6 +263,7 @@ public class GUI_Layout extends JFrame{
         intProxy.addItem("Current Month");
         intProxy.addItem("Current Year");
     }
+
 
     /************************ ACTION LISTENERS BELOW *****************************************/
 
@@ -378,10 +408,10 @@ public class GUI_Layout extends JFrame{
         public void actionPerformed(ActionEvent e) {
             CardLayout layout = (CardLayout) (cardStack.getLayout());
             Object source = e.getSource();
-            if (source == timeSheetDevBackButton) {
+            if (managerStatus == 0) {
                 layout.show(cardStack, clockedInOrOut);
                 setSize(400,200);
-            } else if( source == timeSheetManBackButton ){
+            } else if( managerStatus == 1){
                 layout.show(cardStack,clockedInOrOut);
                 setSize(400,300);
             }
@@ -442,6 +472,22 @@ public class GUI_Layout extends JFrame{
                 JOptionPane.showMessageDialog(null, genList.toString());
             else
                 JOptionPane.showMessageDialog(null, "NO RESULTS FOUND");
+        }
+    }
+
+    private class SystemButton implements ActionListener{
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            systemManATAddTask.addActionListener(new AddTask(systemManATProjectSelector, systemManATTaskName, map.getProjects()));
+            systemManAPAddProject.addActionListener(new AddEmployee(systemManFirstNameTextField, systemManLastNameTextField,
+                    systemManHireDateTextField, systemManGroupSelector));
+            systemManCPCreateProject.addActionListener(new AddProject());
+
+            CardLayout layout = (CardLayout) (cardStack.getLayout());
+            layout.show(cardStack, "systemMan");
+            setSize(400,500);
         }
     }
 }

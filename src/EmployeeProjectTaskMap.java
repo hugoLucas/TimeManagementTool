@@ -16,13 +16,6 @@ public class EmployeeProjectTaskMap {
     }
 
     public void addMapping(EmployeeProject p, EmployeeTask t){
-        /*boolean addToTasks = true;
-        for(EmployeeTask tk: tasks){
-            if(tk.getTaskName().equals(t.getTaskName()))
-                addToTasks = false;
-        }
-        if(addToTasks) {
-            */
         tasks.add(t);
 
         boolean addToProjects = true;
