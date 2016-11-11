@@ -81,6 +81,15 @@ public class GUI_Layout extends JFrame{
     private JButton systemManATBackButton;
     private JTextField systemManCPProjectName;
     private JButton systemManCPCreateProject;
+    private JButton loginNewEmployeeButton;
+    private JPanel NewUser;
+    private JTextField newUserFirstName;
+    private JTextField newUserLastName;
+    private JTextField newUserDateHired;
+    private JTextField newUserUsernameField;
+    private JPasswordField newUserPasswordField;
+    private JButton newUserCreateLoginButton;
+    private JButton newUserBackButton;
 
     public GUI_Layout(){
         setContentPane(cardStack);
@@ -92,6 +101,10 @@ public class GUI_Layout extends JFrame{
         setVisible(true);
 
         loginLoginButton.addActionListener(new LoginButtonListener());
+        loginNewEmployeeButton.addActionListener(new LoginNewUser());
+
+        newUserCreateLoginButton.addActionListener(new CreateNewUser(newUserFirstName, newUserLastName,
+                newUserDateHired, newUserUsernameField, newUserPasswordField));
 
         ClockInButtonListener clockin_listener = new ClockInButtonListener();
         clockInDevClockInButton.addActionListener(clockin_listener);
@@ -112,6 +125,7 @@ public class GUI_Layout extends JFrame{
         timeSheetManBackButton.addActionListener(back_listener);
         systemManBackButton.addActionListener(back_listener);
         systemManATBackButton.addActionListener(back_listener);
+        newUserBackButton.addActionListener(back_listener);
 
         GenTimeSheetButton timeSheetButton_listener = new GenTimeSheetButton();
         timeSheetDevGenerateButton.addActionListener(timeSheetButton_listener);
@@ -408,7 +422,10 @@ public class GUI_Layout extends JFrame{
         public void actionPerformed(ActionEvent e) {
             CardLayout layout = (CardLayout) (cardStack.getLayout());
             Object source = e.getSource();
-            if (managerStatus == 0) {
+            if(logInObj == null) {
+                layout.show(cardStack, "Login");
+                setSize(400,200);
+            }else if (managerStatus == 0) {
                 layout.show(cardStack, clockedInOrOut);
                 setSize(400,200);
             } else if( managerStatus == 1){
@@ -483,11 +500,20 @@ public class GUI_Layout extends JFrame{
             systemManATAddTask.addActionListener(new AddTask(systemManATProjectSelector, systemManATTaskName, map.getProjects()));
             systemManAPAddProject.addActionListener(new AddEmployee(systemManFirstNameTextField, systemManLastNameTextField,
                     systemManHireDateTextField, systemManGroupSelector));
-            systemManCPCreateProject.addActionListener(new AddProject());
+            systemManCPCreateProject.addActionListener(new AddProject(systemManCPProjectName));
 
             CardLayout layout = (CardLayout) (cardStack.getLayout());
             layout.show(cardStack, "systemMan");
-            setSize(400,500);
+            setSize(400,400);
+        }
+    }
+
+    private class LoginNewUser implements ActionListener {
+
+        public void actionPerformed(ActionEvent e) {
+            CardLayout layout = (CardLayout) (cardStack.getLayout());
+            layout.show(cardStack, "newUser");
+            setSize(400, 350);
         }
     }
 }

@@ -154,6 +154,80 @@ public class DB_Writer {
         }
     }
 
+    public void addProject(String projectName){
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            /* Prepare query to database */
+            String insertQuery = "INSERT INTO projects (ProjectName) VALUES (?);";
+            PreparedStatement insertStatement = writer_connection.prepareStatement(insertQuery);
+            insertStatement.setString(1, projectName);
+
+            /* Execute statement */
+            insertStatement.executeUpdate();
+
+        } catch (ClassNotFoundException e) {
+            /* JAR may not be configured right or JDBC may not be working */
+            e.printStackTrace();
+        } catch (SQLException e) {
+            /* Catch all for errors I have not yet encountered */
+            e.printStackTrace();
+        } finally{
+            if (writer_connection != null)
+                try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
+        }
+    }
+
+    public int createLogin(String firstName, String lastName, Date dateHired, String userName, String passWord){
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            String inspectionQuery = "SELECT login.Username FROM login WHERE login.EmployeeID = ( SELECT employee.EmployeeID FROM employee " +
+                "WHERE employee.FirstName = ? AND employee.HireDate = ?)";
+            PreparedStatement inspectionStatement = writer_connection.prepareStatement(inspectionQuery);
+            inspectionStatement.setString(1, firstName);
+            inspectionStatement.setDate(2, dateHired);
+            ResultSet inspectionSet = inspectionStatement.executeQuery();
+
+            if(!inspectionSet.next()) {
+                /* Prepare query to database */
+                String insertQuery = "INSERT INTO login (Username, Password, EmployeeID) SELECT ?, ?, employee.EmployeeID " +
+                        "FROM employee WHERE employee.FirstName = ? AND employee.LastName = ? AND employee.HireDate = ?";
+
+                PreparedStatement insertStatement = writer_connection.prepareStatement(insertQuery);
+                insertStatement.setString(1, userName);
+                insertStatement.setString(2, passWord);
+                insertStatement.setString(3, firstName);
+                insertStatement.setString(4, lastName);
+                insertStatement.setDate(5, dateHired);
+
+                insertStatement.executeUpdate();
+                insertStatement.close();
+
+                return 1;
+            }else
+                return -1;
+
+        } catch (ClassNotFoundException e) {
+            /* JAR may not be configured right or JDBC may not be working */
+            e.printStackTrace();
+            return -2;
+        } catch (SQLException e) {
+            /* Catch all for errors I have not yet encountered */
+            e.printStackTrace();
+            return -2;
+        } finally{
+            if (writer_connection != null)
+                try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
+        }
+    }
+
     public void setWorkStatus(int employeeNumber, int newStatus){
         try {
             /* Boiler plate to create class and establish connection */
