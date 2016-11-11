@@ -6,6 +6,7 @@ public class userClockIn {
     private int employeeID;
     private int taskID;
 
+
     public userClockIn(int eID, int tID) {
         this.employeeID = eID;
         this.taskID = tID;

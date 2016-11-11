@@ -90,6 +90,11 @@ public class GUI_Layout extends JFrame{
     private JPasswordField newUserPasswordField;
     private JButton newUserCreateLoginButton;
     private JButton newUserBackButton;
+    private JPanel systemManBindTask;
+    private JButton generateAvialableTasksButton;
+    private JComboBox comboBox1;
+    private JComboBox comboBox2;
+    private JButton bindButton;
 
     public GUI_Layout(){
         setContentPane(cardStack);
@@ -273,6 +278,8 @@ public class GUI_Layout extends JFrame{
             }
         };
         projectProxy.addActionListener(timeSheetDevProjSelectorListener);
+
+        intProxy.removeAllItems();
         intProxy.addItem("Current Week");
         intProxy.addItem("Current Month");
         intProxy.addItem("Current Year");
