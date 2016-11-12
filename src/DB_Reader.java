@@ -11,6 +11,10 @@ public class DB_Reader implements Database_Reader{
     static private String db_password;
     static private String url;
 
+    /**
+     * Default constructor. Initializes db_username and db_password
+     * and url to default.
+     */
     public DB_Reader(){
         this.db_username = "root";
         this.db_password = "mysql";
@@ -286,6 +290,14 @@ public class DB_Reader implements Database_Reader{
         }
     }
 
+    /**
+     * Tries to search for assigned tasks to a particular employee via their
+     * employee number. As long as the tasks exist it's put into a container
+     * and then returned.
+     *
+     * @param employee_number
+     * @return the tasks for a particular project
+     */
     public EmployeeProjectTaskMap projectTaskMap(int employee_number) {
         EmployeeProjectTaskMap projTask = new EmployeeProjectTaskMap();
         try {
@@ -331,6 +343,14 @@ public class DB_Reader implements Database_Reader{
         }
     }
 
+    /**
+     * Using an employee's ID, method pulls the projects that the given
+     * employee is working on. Can be used to populate the tasks employee is
+     * working on as well.
+     *
+     * @param employeeID
+     * @return the projectID for the employee, hence allowing you to populate tasks
+     */
     public int[] getCurrentEmployeeTaskAndProject(int employeeID){
         int[] ret = {0,0};
         try {
@@ -382,7 +402,7 @@ public class DB_Reader implements Database_Reader{
      * @param taskID
      * @param start
      * @param end
-     * @return
+     * @return  container of Employee Logs to generate report
      */
     public ArrayList<EmployeeLog> genEmployeeTimeSheet(int employeeNumber, int projID,  int taskID, Date start, Date end){
         ArrayList<EmployeeLog>  records = new ArrayList<>();
@@ -445,6 +465,18 @@ public class DB_Reader implements Database_Reader{
         }
     }
 
+    /**
+     * Takes in an input of employeeNumber and for a particular project and task,
+     * within a date range. While checking for potential blank data or errors, it
+     * pulls all of the time logs for that employee's task and returns it.
+     *
+     * @param employeeNumber
+     * @param projID
+     * @param taskID
+     * @param start
+     * @param end
+     * @return records of a particular employee's timesheet
+     */
     public ArrayList<EmployeeLog> genManagerTimeSheet(int employeeNumber, int projID,  int taskID, Date start, Date end){
         ArrayList<EmployeeLog>  records = new ArrayList<>();
         try {
@@ -511,6 +543,49 @@ public class DB_Reader implements Database_Reader{
             }
 
             return records;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (reader_connection != null)
+                try {
+                    reader_connection.close();
+                } catch (Exception e) { /* Ignore this I guess! */}
+        }
+    }
+
+    /**
+     * Generates a list of all Tasks that are not assigned to a specific project.
+     * Used to bing tasks to project by Manager level employee.
+     *
+     * @return  list of all orphaned tasks
+     */
+    public ArrayList<EmployeeTask> orphanTasks(){
+        ArrayList<EmployeeTask> taskList = new ArrayList<>();
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            /* Prepares query to get task in row with null timeout*/
+            String query = "Select tasks.TaskID, tasks.TaskName FROM tasks WHERE taskID NOT IN(SELECT project_task_map.TaskID " +
+                    "FROM project_task_map)";
+
+            PreparedStatement stmt = reader_connection.prepareStatement(query);
+            ResultSet res = stmt.executeQuery();
+
+            while(res.next())
+                taskList.add(new EmployeeTask(res.getString("TaskName"), res.getInt("TaskID")));
+
+            if(taskList.size() > 0)
+                return taskList;
+            else
+                return null;
+
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return null;

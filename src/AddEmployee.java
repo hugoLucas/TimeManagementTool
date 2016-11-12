@@ -20,16 +20,31 @@ public class AddEmployee implements ActionListener {
     private JTextField lastName;
     private JTextField hireDate;
     private JComboBox groupSelector;
-    //private JList projectSelector;
 
+
+    /**
+     * Default constructor which takes in the components housing the properites
+     * of the new employee to be added.
+     *
+     * @param fn    JTextField in which user inputs the first name of the new employee
+     * @param ln    JTextField in which user inputs the last name of the new employee
+     * @param hd    JTextField in which user inputs the hire date of the new employee
+     * @param gs    JComboBox which allows the user to select the rank of the new employee
+     *
+     */
     public AddEmployee(JTextField fn, JTextField ln, JTextField hd, JComboBox gs/*, JList ps*/){
         this.firstName = fn;
         this.lastName = ln;
         this.hireDate = hd;
         this.groupSelector = gs;
-        //this.projectSelector = ps;
     }
 
+    /**
+     * When an action is detected, all data is gathered from the object parameters
+     * and then passed to the database writer.
+     *
+     * @param e     Action which triggered method call
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         String firstNameEntered = this.getEntry(this.firstName);
@@ -42,7 +57,15 @@ public class AddEmployee implements ActionListener {
         writer.addEmployee(firstNameEntered, lastNameEntered, startDateEntered, groupSelected);
     }
 
-    public String getEntry (JTextField name){
+    /**
+     * If the given JTextField has valid, non-blank data, this method extracts
+     * that information.
+     *
+     * @param name  JTextField parameter
+     * @return data captured from the text field
+     *
+     */
+    private String getEntry (JTextField name){
         String toRet = null;
         if(!name.getText().equals(""))
             toRet = name.getText();
@@ -50,6 +73,13 @@ public class AddEmployee implements ActionListener {
         return toRet;
     }
 
+    /**
+     * If the hireDate isn't blank method parses the String date representation
+     * into a valid java.sql.Date object.
+     *
+     * @return Date objected to be passed to database writer
+     *
+     */
     public Date extractDate(){
         Date toRet = null;
 

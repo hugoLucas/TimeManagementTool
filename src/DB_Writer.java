@@ -228,6 +228,35 @@ public class DB_Writer {
         }
     }
 
+    public void assignTask(int taskID, int projectID){
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            /* Prepare query to database */
+            String updateQuery = "INSERT INTO project_task_map (TaskID, ProjectID) VALUES (?, ?)";
+            PreparedStatement updateStatement = writer_connection.prepareStatement(updateQuery);
+            updateStatement.setInt(1, taskID);
+            updateStatement.setInt(2, projectID);
+
+            /* Execute statement */
+            updateStatement.executeUpdate();
+
+        } catch (ClassNotFoundException e) {
+            /* JAR may not be configured right or JDBC may not be working */
+            e.printStackTrace();
+        } catch (SQLException e) {
+            /* Catch all for errors I have not yet encountered */
+            e.printStackTrace();
+        } finally{
+            if (writer_connection != null)
+                try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
+        }
+
+    }
+
     public void setWorkStatus(int employeeNumber, int newStatus){
         try {
             /* Boiler plate to create class and establish connection */

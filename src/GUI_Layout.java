@@ -10,13 +10,17 @@ import java.util.Date;
  * Created by Hugo on 11/3/2016.
  */
 public class GUI_Layout extends JFrame{
-    private String clockedInOrOut;
-    private userLogIn logInObj;
-    private Timer currentClockTimer;
-    private int employeeID;
-    private EmployeeProjectTaskMap map;
-    private int managerStatus;
 
+    /* Global private variables */
+    private EmployeeProjectTaskMap map;     /* Maps project-task relationship */
+    private Timer currentClockTimer;    /* Reference to JLabel current serving as proxy clock */
+    private String clockedInOrOut;  /* Stores name of most recently used Clock-In/Clock-Out screen */
+    private userLogIn logInObj; /* Handles new user login and contains information regarding projects/tasks */
+    private int managerStatus;  /* Determines what rank a user is */
+    private int employeeID; /* Stores the employee identifer used by SQL database to track current user */
+
+
+    /* IntelliJ generated GUI components */
     private JPanel cardStack;
     private JTextField loginUsername;
     private JPasswordField loginPassword;
@@ -91,12 +95,20 @@ public class GUI_Layout extends JFrame{
     private JButton newUserCreateLoginButton;
     private JButton newUserBackButton;
     private JPanel systemManBindTask;
-    private JButton generateAvialableTasksButton;
-    private JComboBox comboBox1;
-    private JComboBox comboBox2;
-    private JButton bindButton;
+    private JButton systemManBTGen;
+    private JComboBox systemManBTTasksSel;
+    private JComboBox systemManBTProjSel;
+    private JButton systemManBTBind;
+    private JButton systemManCPBack;
+    private JButton systemManBTBack;
 
+    /**
+     * Constructor for main class that holds all GUI components. Attaches listeners to buttons
+     * and sets default dimensions and behavior for main GUI screen.
+     */
     public GUI_Layout(){
+
+        /* Set defualt properties for GUI window */
         setContentPane(cardStack);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
@@ -105,6 +117,7 @@ public class GUI_Layout extends JFrame{
         setResizable(false);
         setVisible(true);
 
+        /* Create and bind action listeners to respective buttons */
         loginLoginButton.addActionListener(new LoginButtonListener());
         loginNewEmployeeButton.addActionListener(new LoginNewUser());
 
@@ -130,6 +143,8 @@ public class GUI_Layout extends JFrame{
         timeSheetManBackButton.addActionListener(back_listener);
         systemManBackButton.addActionListener(back_listener);
         systemManATBackButton.addActionListener(back_listener);
+        systemManCPBack.addActionListener(back_listener);
+        systemManBTBack.addActionListener(back_listener);
         newUserBackButton.addActionListener(back_listener);
 
         GenTimeSheetButton timeSheetButton_listener = new GenTimeSheetButton();
@@ -139,27 +154,35 @@ public class GUI_Layout extends JFrame{
         SystemButton systemButton_listener = new SystemButton();
         clockInManSystemButton.addActionListener(systemButton_listener);
         clockOutManSystemButton.addActionListener(systemButton_listener);
-
     }
 
+    /**
+     * Depending on the rank of the employee, method helps prepare the Manager Clock-In Screen or the Developer
+     * Clock-In Screen by populating the dropdown menus present in both screens. Method also attaches listeners
+     * to the Project Selector in order to display only Tasks associated with the user selected Project.
+     */
     public void setLoginDropdowns(){
-        ArrayList<String> projDropDown = logInObj.projectList(map);;
+        /* Gathers list of all projects/tasks available to current user */
+        ArrayList<String> projDropDown = logInObj.projectList(map);
         ArrayList<String> taskDropDown = logInObj.tasksInProject(projDropDown.get(0), map);
+
+        /* Assigns developer/manager GUI components to proxies in order to reduce code duplication */
         JComboBox projectProxy = null;
         JComboBox taskProxy = null;
-
         if(managerStatus == 1){ projectProxy = clockInManProjectSelector; taskProxy = clockInManTaskSelector; }
         else{ projectProxy = clockInDevProjectSelector; taskProxy = clockInDevTaskSelector; }
 
+        /* Removes all items from ComboBoxes and refills them with appropriate values */
         projectProxy.removeAllItems();
         for(String proj: projDropDown)
             projectProxy.addItem(proj);
-
         taskProxy.removeAllItems();
         for(String task: taskDropDown)
             taskProxy.addItem(task);
 
-        ActionListener clockInDevProjSelectorListener = new ActionListener() {
+        /* Creates action listener that changes the tasks available for selection according to the project
+        * selected by the user. Assures project/task selected have appropriate relationship */
+        ActionListener clockInProjSelectorListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(e.getSource() == clockInDevProjectSelector) {
@@ -178,9 +201,16 @@ public class GUI_Layout extends JFrame{
             }
         };
 
-        projectProxy.addActionListener(clockInDevProjSelectorListener);
+        projectProxy.addActionListener(clockInProjSelectorListener);
     }
 
+    /**
+     * Helps prepare the Developer or Manager Clock-Out screen by properly labeling the GUI
+     * screen with the current project and task being worked on by the user.
+     *
+     * @param projSel   the name of the current project the user is working on
+     * @param taskSel   the name of the current task the user is working on
+     */
     public void prepClockOutScreen(String projSel, String taskSel){
         if (managerStatus == 0) {
             clockOutDevCurrentProject.setText(projSel);
@@ -191,6 +221,13 @@ public class GUI_Layout extends JFrame{
         }
     }
 
+    /**
+     * Adds an ActionListner to the JLabel provided. This ActionListener then updates the text in the JLabel
+     * periodically in order to simulate a digital clock. Stores a reference to the proxy clock in a global
+     * variable to make destruction of clock easier.
+     *
+     * @param clockToSet    JLabel object to use as a proxy clock
+     */
     public void setClock(JLabel clockToSet){
         currentClockTimer = new Timer(100, new ActionListener() {
             @Override
@@ -203,11 +240,18 @@ public class GUI_Layout extends JFrame{
         currentClockTimer.start();
     }
 
+    /**
+     * Destroys the current proxy clock by removing the ActionListener attached to it.
+     */
     public void destroyClock(){
         for(ActionListener al: currentClockTimer.getActionListeners())
             currentClockTimer.removeActionListener(al);
     }
 
+    /**
+     * Prepares the Manager and Developer Timesheet pages by populating the drop down menus in
+     * each as well as attaching listeners to the selectors.
+     */
     public void prepTimeSheet(){
         ArrayList<String> projDropDown = logInObj.projectList(map);
         ArrayList<String> taskDropDown = logInObj.tasksInProject(projDropDown.get(0), map);
@@ -291,6 +335,11 @@ public class GUI_Layout extends JFrame{
 
     private class LoginButtonListener implements ActionListener {
 
+        /**
+         * Method handles the log-in of a user as well as the display of the first screen the
+         * user will encounter, be they developer or manager.
+         * @param e     Action triggering call
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == loginLoginButton){
@@ -345,6 +394,12 @@ public class GUI_Layout extends JFrame{
 
     private class ClockInButtonListener implements ActionListener{
 
+        /**
+         * Extracts text/selections from the dropdown menus in the Clock-In screen and passes that information
+         * to userClockIn object in order to alter the database.
+         *
+         * @param e     action that triggers call
+         */
         @Override
         public void actionPerformed(ActionEvent e){
             CardLayout layout = (CardLayout) (cardStack.getLayout());
@@ -376,6 +431,12 @@ public class GUI_Layout extends JFrame{
 
     private class ClockOutButtonListener implements ActionListener{
 
+        /**
+         * Creates a userClockOut object to handle the altering of the database in order to clock a
+         * user out.
+         *
+         * @param e     action that triggers call
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
             CardLayout layout = (CardLayout) (cardStack.getLayout());
@@ -407,6 +468,12 @@ public class GUI_Layout extends JFrame{
 
     private class TimeSheetButton implements ActionListener{
 
+        /**
+         * This button changes the current screen to the rank-appropriate Timesheet screen for both Developers
+         * and Managers.
+         *
+         * @param e     action that triggered call
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
             CardLayout layout = (CardLayout) (cardStack.getLayout());
@@ -425,6 +492,11 @@ public class GUI_Layout extends JFrame{
 
     private class BackButton implements ActionListener{
 
+        /**
+         * Navigates to the previous screen the user was in.
+         *
+         * @param e     action that triggered call
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
             CardLayout layout = (CardLayout) (cardStack.getLayout());
@@ -444,6 +516,13 @@ public class GUI_Layout extends JFrame{
 
     private class GenTimeSheetButton implements ActionListener{
 
+        /**
+         * Extracts data from Timesheet screen and creates a GenTimeSheet object to handle the
+         * database querry. Results in a pop-up with timesheet report if any results were found
+         * and a failure message if no results were found.
+         *
+         * @param e     action triggered by generate time sheet button
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
             JComboBox projectProxy = null;
@@ -501,6 +580,10 @@ public class GUI_Layout extends JFrame{
 
     private class SystemButton implements ActionListener{
 
+        /**
+         * Navigates to the Manager-only system panel.
+         * @param e
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
 
@@ -508,6 +591,7 @@ public class GUI_Layout extends JFrame{
             systemManAPAddProject.addActionListener(new AddEmployee(systemManFirstNameTextField, systemManLastNameTextField,
                     systemManHireDateTextField, systemManGroupSelector));
             systemManCPCreateProject.addActionListener(new AddProject(systemManCPProjectName));
+            systemManBTBind.addActionListener(new BindTask(systemManBTGen, systemManBTTasksSel, systemManBTProjSel, map));
 
             CardLayout layout = (CardLayout) (cardStack.getLayout());
             layout.show(cardStack, "systemMan");
@@ -517,6 +601,11 @@ public class GUI_Layout extends JFrame{
 
     private class LoginNewUser implements ActionListener {
 
+        /**
+         * Changes current screen to the new user screen.
+         * @param e
+         */
+        @Override
         public void actionPerformed(ActionEvent e) {
             CardLayout layout = (CardLayout) (cardStack.getLayout());
             layout.show(cardStack, "newUser");

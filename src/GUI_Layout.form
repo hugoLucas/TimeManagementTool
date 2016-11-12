@@ -1164,7 +1164,7 @@
                   </component>
                 </children>
               </grid>
-              <grid id="73f0a" binding="systemManAddProject" layout-manager="GridLayoutManager" row-count="5" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="73f0a" binding="systemManAddProject" layout-manager="GridLayoutManager" row-count="7" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <tabbedpane title="Add Project"/>
@@ -1228,9 +1228,25 @@
                       <text value=""/>
                     </properties>
                   </component>
+                  <component id="5ea7f" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="6a05a" class="javax.swing.JButton" binding="systemManCPBack">
+                    <constraints>
+                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Back"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
-              <grid id="33e3f" binding="systemManBindTask" layout-manager="GridLayoutManager" row-count="10" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="33e3f" binding="systemManBindTask" layout-manager="GridLayoutManager" row-count="12" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <tabbedpane title="Bind Task"/>
@@ -1246,7 +1262,7 @@
                       <text value=""/>
                     </properties>
                   </component>
-                  <component id="d3236" class="javax.swing.JButton" binding="generateAvialableTasksButton" default-binding="true">
+                  <component id="d3236" class="javax.swing.JButton" binding="systemManBTGen">
                     <constraints>
                       <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
@@ -1270,7 +1286,7 @@
                       <text value="Available Tasks:"/>
                     </properties>
                   </component>
-                  <component id="5bf57" class="javax.swing.JComboBox" binding="comboBox1" default-binding="true">
+                  <component id="5bf57" class="javax.swing.JComboBox" binding="systemManBTTasksSel">
                     <constraints>
                       <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
@@ -1292,7 +1308,7 @@
                       <text value="Available Projects:"/>
                     </properties>
                   </component>
-                  <component id="14e6b" class="javax.swing.JComboBox" binding="comboBox2" default-binding="true">
+                  <component id="14e6b" class="javax.swing.JComboBox" binding="systemManBTProjSel">
                     <constraints>
                       <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
@@ -1322,12 +1338,28 @@
                       <text value=""/>
                     </properties>
                   </component>
-                  <component id="20b2b" class="javax.swing.JButton" binding="bindButton" default-binding="true">
+                  <component id="20b2b" class="javax.swing.JButton" binding="systemManBTBind">
                     <constraints>
                       <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text value="Bind"/>
+                    </properties>
+                  </component>
+                  <component id="d2eb2" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="1ab41" class="javax.swing.JButton" binding="systemManBTBack">
+                    <constraints>
+                      <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Back"/>
                     </properties>
                   </component>
                 </children>
