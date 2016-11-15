@@ -30,6 +30,8 @@ public class BindTask implements ActionListener {
                     taskSelector.removeAllItems();
                     for(EmployeeTask t: taskList)
                         taskSelector.addItem(t.getTaskName());
+                }else{
+                    JOptionPane.showMessageDialog(null, "No Tasks Available to Bind!");
                 }
             }
         });

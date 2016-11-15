@@ -21,24 +21,24 @@ public class GUI_Layout extends JFrame{
 
 
     /* IntelliJ generated GUI components */
-    private JPanel cardStack;
-    private JTextField loginUsername;
-    private JPasswordField loginPassword;
-    private JButton loginLoginButton;
-    private JPanel Login;
-    private JPanel ClockinDev;
-    private JComboBox clockInDevProjectSelector;
-    private JComboBox clockInDevTaskSelector;
-    private JButton clockInDevClockInButton;
-    private JButton clockInDevTimeSheetButton;
-    private JPanel ClockoutDev;
-    private JButton clockOutDevTimeSheetButton;
-    private JButton clockOutDevClockOutButton;
-    private JTextArea textArea1;
-    private JLabel clockinDevTimer;
-    private JLabel clockOutDevCurrentProject;
-    private JLabel clockOutDevCurrentTask;
-    private JLabel clockOutDevClock;
+    private JPanel cardStack; /* Main JPanel that contains all other GUI pages*/
+    private JTextField loginUsername; /* JTextField which allows user to supply a username */
+    private JPasswordField loginPassword; /* JPasswordField that allows user to supply their login password */
+    private JButton loginLoginButton; /* JButton that triggers login sequence */
+    private JPanel Login; /* Parent panel containing all login components */
+    private JPanel ClockinDev; /* Parent panel containing all ClockInDev components */
+    private JComboBox clockInDevProjectSelector; /* Allows developer users to select project to work on */
+    private JComboBox clockInDevTaskSelector; /* Allows developer users to select a task to work on */
+    private JButton clockInDevClockInButton; /* Allows developer user to trigger clock in actions */
+    private JButton clockInDevTimeSheetButton; /* Allows developer users to navigate to developer timesheet panel */
+    private JPanel ClockoutDev; /* Parent panel containing all ClockoutDev components */
+    private JButton clockOutDevTimeSheetButton; /* Allows developer users to navigate to developer timesheet panel */
+    private JButton clockOutDevClockOutButton; /* Allows developer users to trigger clock out actions */
+    private JTextArea clockOutDevCommentSection; /* Allows for the entry of unsaved comments */
+    private JLabel clockinDevTimer; /* JLabel that is updated every second with the current time to simulate a digital clock */
+    private JLabel clockOutDevCurrentProject; /* Displays the current project a developer is working on */
+    private JLabel clockOutDevCurrentTask; /* Displays the current task a developer is working on */
+    private JLabel clockOutDevClock; /* JLabel that is updated every second with the current time to simulate a digital clock */
     private JPanel TimesheetDev;
     private JLabel timeSheetLabel;
     private JComboBox timeSheetDevProjectSelector;
@@ -101,6 +101,13 @@ public class GUI_Layout extends JFrame{
     private JButton systemManBTBind;
     private JButton systemManCPBack;
     private JButton systemManBTBack;
+    private JButton timeSheetManProgressReportButton;
+    private JTextField systemManATEstimateTime;
+    private JPanel systemManAssignTask;
+    private JButton systemManAsTGenButton;
+    private JComboBox systemManAsTTaskSelector;
+    private JComboBox systemManAsTEmployeeSelector;
+    private JButton systemManAstAssignButton;
 
     /**
      * Constructor for main class that holds all GUI components. Attaches listeners to buttons
@@ -154,6 +161,9 @@ public class GUI_Layout extends JFrame{
         SystemButton systemButton_listener = new SystemButton();
         clockInManSystemButton.addActionListener(systemButton_listener);
         clockOutManSystemButton.addActionListener(systemButton_listener);
+
+        ProgressReport reportButton_listener = new ProgressReport();
+        timeSheetManProgressReportButton.addActionListener(reportButton_listener);
     }
 
     /**
@@ -161,7 +171,7 @@ public class GUI_Layout extends JFrame{
      * Clock-In Screen by populating the dropdown menus present in both screens. Method also attaches listeners
      * to the Project Selector in order to display only Tasks associated with the user selected Project.
      */
-    public void setLoginDropdowns(){
+    public void setClockIDropdowns(){
         /* Gathers list of all projects/tasks available to current user */
         ArrayList<String> projDropDown = logInObj.projectList(map);
         ArrayList<String> taskDropDown = logInObj.tasksInProject(projDropDown.get(0), map);
@@ -361,12 +371,12 @@ public class GUI_Layout extends JFrame{
                     if(result[1] == 0) {
                         if (result[2] == 0) {
                             setClock(clockinDevTimer);
-                            setLoginDropdowns();
+                            setClockIDropdowns();
                             layout.show(cardStack, "ClockInDev");
                             clockedInOrOut = "ClockInDev";
                         }else{
                             setClock(clockInManTimer);
-                            setLoginDropdowns();
+                            setClockIDropdowns();
                             setSize(400,300);
                             layout.show(cardStack, "ClockInMan");
                             clockedInOrOut = "ClockInMan";
@@ -447,7 +457,7 @@ public class GUI_Layout extends JFrame{
                 clockOutUser.clockOut();
 
                 destroyClock();
-                setLoginDropdowns();
+                setClockIDropdowns();
                 setClock(clockinDevTimer);
                 layout.show(cardStack, "ClockInDev");
                 clockedInOrOut = "ClockInDev";
@@ -458,7 +468,7 @@ public class GUI_Layout extends JFrame{
                 clockOutUser.clockOut();
 
                 destroyClock();
-                setLoginDropdowns();
+                setClockIDropdowns();
                 setClock(clockInManTimer);
                 layout.show(cardStack, "ClockInMan");
                 clockedInOrOut = "ClockInMan";
@@ -587,15 +597,16 @@ public class GUI_Layout extends JFrame{
         @Override
         public void actionPerformed(ActionEvent e) {
 
-            systemManATAddTask.addActionListener(new AddTask(systemManATProjectSelector, systemManATTaskName, map.getProjects()));
+            systemManATAddTask.addActionListener(new AddTask(systemManATProjectSelector, systemManATTaskName, systemManATEstimateTime, map.getProjects()));
             systemManAPAddProject.addActionListener(new AddEmployee(systemManFirstNameTextField, systemManLastNameTextField,
                     systemManHireDateTextField, systemManGroupSelector));
             systemManCPCreateProject.addActionListener(new AddProject(systemManCPProjectName));
             systemManBTBind.addActionListener(new BindTask(systemManBTGen, systemManBTTasksSel, systemManBTProjSel, map));
+            systemManAsTGenButton.addActionListener(new AssignTask(systemManAsTEmployeeSelector, systemManAsTTaskSelector, systemManAstAssignButton));
 
             CardLayout layout = (CardLayout) (cardStack.getLayout());
             layout.show(cardStack, "systemMan");
-            setSize(400,400);
+            setSize(500,400);
         }
     }
 

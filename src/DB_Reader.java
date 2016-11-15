@@ -599,4 +599,91 @@ public class DB_Reader implements Database_Reader{
                 } catch (Exception e) { /* Ignore this I guess! */}
         }
     }
+
+    /**
+     * Looks through database and determines how many hours a project's tasks have been worked. Query compares this to the
+     * estimated amount of work-hours needed to complete the project.
+     *
+     */
+    public ArrayList<ProjectLine> genProgressReport(){
+        ArrayList<ProjectLine> rep = new ArrayList<>();
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            String reportQuery = "select p.ProjectID, sum(t.EstimatedTimel) as TimeEstimate, sum(t.TimeWorked) as TimeWorked" +
+                    " from tasks as t, project_task_map as p where p.TaskID = t.TaskID group by p.ProjectID";
+            PreparedStatement reportStmt = reader_connection.prepareStatement(reportQuery);
+            ResultSet reportSet = reportStmt.executeQuery();
+            while(reportSet.next()) {
+                int projID = reportSet.getInt("ProjectID");
+                int hourEst = reportSet.getInt("TimeEstimate");
+                int hourWrk = reportSet.getInt("TimeWorked");
+                String projectName = "";
+
+                PreparedStatement subStmt = reader_connection.prepareStatement("SELECT ProjectName FROM projects WHERE ProjectID = ?");
+                subStmt.setInt(1, projID);
+                ResultSet subSet = subStmt.executeQuery();
+                if(subSet.next())
+                    projectName = subSet.getString("ProjectName");
+                rep.add(new ProjectLine(projID, projectName, hourWrk, hourEst));
+            }
+            return rep;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (reader_connection != null)
+                try { reader_connection.close(); } catch (Exception e) { /* Ignore this I guess! */}
+        }
+    }
+
+    /**
+     * Returns all tasks not assigned to a given employee.
+     *
+     * @param employeeID    employee number
+     * @return  An array list containing all tasks the employee is not assigned to.
+     */
+    public ArrayList<EmployeeTask> unassignedTask(int employeeID){
+        ArrayList<EmployeeTask> tskList = new ArrayList<>();
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            String taskQuery = "SELECT TaskID, TaskName FROM tasks WHERE taskID NOT IN (" +
+                    " SELECT TaskID FROM employee_task_map WHERE employeeID = ?)";
+            PreparedStatement taskStmt = reader_connection.prepareStatement(taskQuery);
+            taskStmt.setInt(1, employeeID);
+            ResultSet taskSet = taskStmt.executeQuery();
+
+            while(taskSet.next()){
+                int taskID = taskSet.getInt("TaskID");
+                String taskName = taskSet.getString("TaskName");
+
+                tskList.add(new EmployeeTask(taskName, taskID));
+            }
+
+            taskStmt.close();
+            taskSet.close();
+
+            return tskList;
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (reader_connection != null)
+                try { reader_connection.close(); } catch (Exception e) { /* Ignore this I guess! */}
+        }
+    }
 }

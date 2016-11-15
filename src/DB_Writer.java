@@ -53,6 +53,14 @@ public class DB_Writer {
         }
     }
 
+    /**
+     * Updates the time-out field for an employee time-log associated with a given task and employee identification
+     * number and with a time-out field equal to null. Calculates the hours worked on task by an employee and adds
+     * that number to the database in order to track progress of project.
+     *
+     * @param employeeNumber    employee identification number
+     * @param taskID            task identification number
+     */
     public void clockOutUser(int employeeNumber, int taskID) {
         Time clockOutTime = new Time(System.currentTimeMillis());
         try {
@@ -61,16 +69,45 @@ public class DB_Writer {
             Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
+            String differenceQuery = "SELECT TimeIn, Date FROM time_logs WHERE EmployeeID = ? AND TaskID = ? AND TimeOut IS NULL";
+            PreparedStatement difStatement = writer_connection.prepareStatement(differenceQuery);
+            difStatement.setInt(1, employeeNumber);
+            difStatement.setInt(2, taskID);
+
+            /* Execute statement */
+            ResultSet difTime = difStatement.executeQuery();
+            long time = 0;
+            if(difTime.next()) {
+                Time timeObj = difTime.getTime("TimeIn");
+                long miliHour = timeObj.getTime();
+                time = miliHour - 86400000;
+            }
+
+            difTime.close();
+            difStatement.close();
+
+            long currentTime =  clockOutTime.getTime() % 86400000;
+            double differenceInHours = (currentTime - time) * 2.78 * Math.pow(10,-7);
+
             /* Prepare query to database */
-            /* Could result in only one time log for a given task */
-            String updateQuery = "UPDATE time_logs SET TimeOut = ? WHERE EmployeeID = ? AND TaskID = ?";
+            String updateQuery = "UPDATE time_logs SET TimeOut = ? WHERE EmployeeID = ? AND TaskID = ? AND TimeOut IS NULL";
             PreparedStatement updateStatement = writer_connection.prepareStatement(updateQuery);
             updateStatement.setTime(1, clockOutTime);
             updateStatement.setInt(2, employeeNumber);
             updateStatement.setInt(3, taskID);
 
+            updateStatement.executeUpdate();
+
+            updateQuery = "UPDATE tasks SET TimeWorked = TimeWorked + ? WHERE TaskID = ?";
+            updateStatement = writer_connection.prepareStatement(updateQuery);
+            updateStatement.setDouble(1, differenceInHours);
+            updateStatement.setInt(2, taskID);
+
             /* Execute statement */
             updateStatement.executeUpdate();
+            updateStatement.close();
+
+
 
         } catch (ClassNotFoundException e) {
             /* JAR may not be configured right or JDBC may not be working */
@@ -117,7 +154,7 @@ public class DB_Writer {
         }
     }
 
-    public void addTask(String newTaskName, String projectSelected){
+    public void addTask(String newTaskName, String projectSelected, int hourEstimate){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
@@ -125,9 +162,10 @@ public class DB_Writer {
             /* Boiler plate to create class and establish connection */
 
             /* Prepare query to database */
-            String insertQuery = "INSERT INTO tasks(TaskName) VALUES (?)";
+            String insertQuery = "INSERT INTO tasks(TaskName, EstimatedTimel) VALUES (?, ?)";
             PreparedStatement insertStatement = writer_connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
             insertStatement.setString(1, newTaskName);
+            insertStatement.setInt(2, hourEstimate);
 
             insertStatement.executeUpdate();
             ResultSet keyGetter = insertStatement.getGeneratedKeys();
@@ -285,4 +323,30 @@ public class DB_Writer {
         }
     }
 
+    public void assignTaskToEmployee(int taskID, int employeeID){
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            /* Prepare query to database */
+            String insertQuery = "INSERT employee_task_map(EmployeeID, TaskID) VALUES (?, ?)";
+            PreparedStatement insertStmt = writer_connection.prepareStatement(insertQuery);
+            insertStmt.setInt(1, employeeID);
+            insertStmt.setInt(2, taskID);
+
+            insertStmt.execute();
+
+        } catch (ClassNotFoundException e) {
+            /* JAR may not be configured right or JDBC may not be working */
+            e.printStackTrace();
+        } catch (SQLException e) {
+            /* Catch all for errors I have not yet encountered */
+            e.printStackTrace();
+        } finally{
+            if (writer_connection != null)
+                try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
+        }
+    }
 }
