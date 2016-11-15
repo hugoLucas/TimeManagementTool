@@ -4,38 +4,43 @@
 import java.sql.*;
 import java.util.ArrayList;
 
-public class DB_Reader implements Database_Reader{
+public class DB_Reader {
 
-    private Connection reader_connection;   //Always use connection in shortest possible scope
-    static private String db_username;
-    static private String db_password;
-    static private String url;
+    private Connection reader_connection;   /* Connection shared by all methods, use in smallest possible scope */
+    static private String db_username;      /* Username used to access database */
+    static private String db_password;      /* Password used to access database */
+    static private String url;              /* Url used to establish JDBC connection */
 
     /**
-     * Default constructor. Initializes db_username and db_password
-     * and url to default.
+     * Default constructor. Initializes fields to their default values. If testing is being done use the local
+     * host url, otherwise use the CloudSQL url.
      */
     public DB_Reader(){
         this.db_username = "root";
         this.db_password = "mysql";
+
+        /* Use this for release testing */
         //this.url = "jdbc:mysql://google/time_management_system?cloudSqlInstance=tmtproject-148101:us-central1:timemanagementsystem&socketFactory=com.google.cloud.sql.mysql.SocketFactory";
+
+        /* Use this for all other internal testing */
         this.url = "jdbc:mysql://localhost:3306/time_management_system";
     }
 
     /**
-     * Given a user's login information, method will return the employee_number of the
+     * Given a user's login information, method will return the number, work status, and rank of the
      * user if the login credentials are valid. Invalid credentials will result in negative
-     * value.
+     * values.
+     *
      * @param input_password    password retrieved by GUI page
      * @param input_username    username retrieved by GUI page
-     * @return  Employee number of user if login is valid, -1 if invalid, -2 if other errors
+     * @return                  positive numbers for the variables described above, negative values if login is invalid
      */
     public int[] login_user(String input_password, String input_username) {
         int[] result = {-1,-1, -1};
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepare query to database */
@@ -51,7 +56,6 @@ public class DB_Reader implements Database_Reader{
                     result[0] = queryResult.getInt("EmployeeID");
                     result[1] = queryResult.getInt("workstatus");
                     result[2] = queryResult.getInt("manager");
-
                     break;
                 }
             }
@@ -74,184 +78,10 @@ public class DB_Reader implements Database_Reader{
     }
 
     /**
-     * Given a valid employee identification number, method will return a list of
-     * projects an employee can work on.
+     * Looks through database in order to find all employees entered into the database.
      *
-     * @param employee_number EmployeeID
-     * @return list of all projects an employee can work, can be used by GUI to populate
-     * input selection menus
+     * @return      ArrayList containing Employee objects representing employees in database
      */
-    @Override
-    public ArrayList<EmployeeProject> projectsAvailable(int employee_number) {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-
-            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
-            String query = "SELECT TaskID FROM employee_task_map WHERE EmployeeID = ?";
-            PreparedStatement stmt = reader_connection.prepareStatement(query);
-            stmt.setInt(1, employee_number);
-
-            ResultSet queryResult = stmt.executeQuery();
-            ArrayList<Integer> projs = new ArrayList<Integer>();
-            while (queryResult.next()){
-                int taskID = queryResult.getInt("TaskID");
-
-                query = "SELECT ProjectID FROM project_task_map WHERE TaskID = ?";
-                PreparedStatement stmt_inner = reader_connection.prepareStatement(query);
-                stmt_inner.setInt(1, taskID);
-
-                ResultSet queryResult_inner = stmt_inner.executeQuery();
-
-                while(queryResult_inner.next()) {
-                    int projectID = queryResult_inner.getInt("ProjectID");
-                    if (!projs.contains(projectID))
-                        projs.add(projectID);
-                }
-
-                stmt_inner.close();
-                queryResult_inner.close();
-            }
-
-            stmt.close();
-            queryResult.close();
-
-            if (projs.size() > 0) {
-                ArrayList<EmployeeProject> projectList = new ArrayList<EmployeeProject>(projs.size());
-                for (int projectID: projs){
-                    query = "SELECT ProjectName FROM projects WHERE ProjectID = ?";
-                    stmt = reader_connection.prepareStatement(query);
-                    stmt.setInt(1, projectID);
-
-                    queryResult = stmt.executeQuery();
-
-                    while(queryResult.next())
-                        projectList.add(new EmployeeProject(queryResult.getString("ProjectName"), projectID));
-                }
-
-                return projectList;
-            } else {return null; }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (reader_connection != null)
-                try {
-                    reader_connection.close();
-                } catch (Exception e) { /* Ignore this I guess! */}
-        }
-    }
-
-
-    /**
-     * Given a valid employee identification number, method will return a list of
-     * tasks an employee can work on.
-     *
-     * @param employee_number EmployeeID
-     * @return list of all tasks an employee can work, can be used by GUI to populate
-     * input selection menus
-     */
-    @Override
-    public ArrayList<EmployeeTask> tasksAvailable(int employee_number) {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-
-            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
-            String query = "SELECT TaskID FROM employee_task_map WHERE EmployeeID = ?";
-            PreparedStatement stmt = reader_connection.prepareStatement(query);
-            stmt.setInt(1, employee_number);
-
-            ResultSet queryResult = stmt.executeQuery();
-            ArrayList<EmployeeTask> tasks = new ArrayList<EmployeeTask>();
-            while(queryResult.next()){
-                int taskID = queryResult.getInt("TaskID");
-                if(!tasks.contains(taskID)){
-                    query = "SELECT TaskName FROM tasks WHERE TaskID = ?";
-                    stmt = reader_connection.prepareStatement(query);
-                    stmt.setInt(1, taskID);
-
-                    ResultSet queryResult_inner = stmt.executeQuery();
-                    while (queryResult_inner.next()){
-                        String taskName = queryResult_inner.getString("TaskName");
-                        tasks.add(new EmployeeTask(taskName, taskID));
-                    }
-                    queryResult_inner.close();
-                }
-            }
-
-            stmt.close();
-            queryResult.close();
-
-            return tasks;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (reader_connection != null)
-                try {
-                    reader_connection.close();
-                } catch (Exception e) { /* Ignore this I guess! */}
-        }
-    }
-
-    /**
-     * Helper method for employee times sheet generation.
-     *
-     * @param list list of all employee whose work hours are needed
-     * @return list of all employee's work hours
-     */
-    @Override
-    public ArrayList<EmployeeLog> employeeWorkHours(ArrayList<Employee> list){
-        ArrayList<EmployeeLog> timeLogs = new ArrayList<>();
-        int paramNum = 1;
-        try {
-            for (Employee currentEmployee: list) {
-                Class.forName("com.mysql.jdbc.Driver");
-
-                Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
-                String query = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE EmployeeID = ?";
-
-                PreparedStatement stmt = reader_connection.prepareStatement(query);
-                stmt.setInt(paramNum, currentEmployee.getEmployeeNumber());
-
-                ResultSet queryResult = stmt.executeQuery();
-
-                while(queryResult.next())
-                    timeLogs.add(new EmployeeLog(queryResult.getTime("TimeIn"),
-                            queryResult.getTime("TimeOut"), queryResult.getDate("Date"),
-                            queryResult.getInt("TaskID")));
-
-                stmt.close();
-                queryResult.close();
-            }
-
-            return timeLogs;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (reader_connection != null)
-                try {
-                    reader_connection.close();
-                } catch (Exception e) { /* Ignore this I guess! */}
-        }
-    }
-
-    /**
-     * Generates a list of all employees currently working at the company. Used
-     * by GUI in manager report generation.
-     *
-     * @return list of employees
-     */
-    @Override
     public ArrayList<Employee> allEmployees() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -291,12 +121,10 @@ public class DB_Reader implements Database_Reader{
     }
 
     /**
-     * Tries to search for assigned tasks to a particular employee via their
-     * employee number. As long as the tasks exist it's put into a container
-     * and then returned.
+     * Generates a mapping of all task and project relationships in the database.
      *
-     * @param employee_number
-     * @return the tasks for a particular project
+     * @param employee_number       I don't know...
+     * @return                      EmployeeProjectTaskMap which represents relationships between tasks and projects
      */
     public EmployeeProjectTaskMap projectTaskMap(int employee_number) {
         EmployeeProjectTaskMap projTask = new EmployeeProjectTaskMap();

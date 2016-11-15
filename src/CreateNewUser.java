@@ -11,12 +11,22 @@ import java.text.SimpleDateFormat;
  */
 public class CreateNewUser implements ActionListener {
 
-    private JTextField firstNameField;
-    private JTextField lastNameField;
-    private JTextField dateHiredField;
-    private JTextField userNameField;
-    private JPasswordField passWordField;
+    private JTextField firstNameField;          /* JTextField used by user to enter the new user's first name */
+    private JTextField lastNameField;           /* JTextField used by user to enter the new user's last name */
+    private JTextField dateHiredField;          /* JTextField used by user to enter the new user's hire date */
+    private JTextField userNameField;           /* JTextField used by user to specify their login username */
+    private JPasswordField passWordField;       /* JPasswordField used by user to specifiy their login password */
 
+    /**
+     * Stores references to GUI components used by user to specify their identifying information and their
+     * desired login credentials
+     *
+     * @param firstName     Reference to GUI component used to specify the user's first name
+     * @param lastName      Reference to GUI component used to specify the user's last name
+     * @param dateHired     Reference to GUI component used to specify the user's date of hire
+     * @param username      Reference to GUI component used to specify the user's desired username
+     * @param password      Reference to GUI component used to specify the user's desired password
+     */
     public CreateNewUser(JTextField firstName, JTextField lastName, JTextField dateHired, JTextField username, JPasswordField password ){
         this.firstNameField = firstName;
         this.lastNameField = lastName;
@@ -25,6 +35,14 @@ public class CreateNewUser implements ActionListener {
         this.passWordField = password;
     }
 
+    /**
+     * Action listener triggered by the create login button. Extracts information from user input fields and passes
+     * that information to a database writer object if non of the user input fields are empty. If the database writer
+     * determines the user already exists or if the new user was created, method generates an appropriate pop-up
+     * message to alert the user of the result.
+     *
+     * @param e     Action which triggered the method call
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         String firstName = this.firstNameField.getText();
@@ -46,6 +64,12 @@ public class CreateNewUser implements ActionListener {
         }
     }
 
+    /**
+     * Given a date String of the format Month-Day-Year, this method turns that String into a java.sql.Date object
+     * in order to pass that information to the database writer. If the transformation fails the method returns null
+     *
+     * @return java.sql.Date object if String is valid, null if not.
+     */
     public Date extractDate(){
         Date toRet = null;
 

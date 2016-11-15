@@ -1,5 +1,3 @@
-import javafx.beans.property.IntegerPropertyBase;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,8 +5,6 @@ import java.sql.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Hugo Lucas on 11/9/2016.
@@ -16,14 +12,14 @@ import java.util.List;
 
 public class AddEmployee implements ActionListener {
 
-    private JTextField firstName;
-    private JTextField lastName;
-    private JTextField hireDate;
-    private JComboBox groupSelector;
+    private JTextField firstName; /* User input field for new Employee first name */
+    private JTextField lastName; /* User input field for new Employee last name */
+    private JTextField hireDate; /* User input field for new Employee hire date */
+    private JComboBox groupSelector; /* User input field for new Employee rank (Developer or Manager) */
 
 
     /**
-     * Default constructor which takes in the components housing the properites
+     * Default constructor which takes in the components housing the properties
      * of the new employee to be added.
      *
      * @param fn    JTextField in which user inputs the first name of the new employee
@@ -40,8 +36,9 @@ public class AddEmployee implements ActionListener {
     }
 
     /**
-     * When an action is detected, all data is gathered from the object parameters
-     * and then passed to the database writer.
+     * Triggered when user presses the add new employee button. Extracts user selections
+     * from fields and passes information to database if the date entered is valid. No checks
+     * are done on the other fields.
      *
      * @param e     Action which triggered method call
      */
@@ -51,10 +48,12 @@ public class AddEmployee implements ActionListener {
         String lastNameEntered = this.getEntry(this.lastName);
         Date startDateEntered = this.extractDate();
         int groupSelected = this.groupSelector.getSelectedIndex();
-        //List<String> projectsSelected = this.projectSelector.getSelectedValuesList();
 
         DB_Writer writer = new DB_Writer();
-        writer.addEmployee(firstNameEntered, lastNameEntered, startDateEntered, groupSelected);
+        if(startDateEntered != null)
+            writer.addEmployee(firstNameEntered, lastNameEntered, startDateEntered, groupSelected);
+        else
+            JOptionPane.showMessageDialog(null, "Invalid date entry, please try again");
     }
 
     /**

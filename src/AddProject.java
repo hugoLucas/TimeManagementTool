@@ -7,12 +7,23 @@ import java.awt.event.ActionListener;
  */
 public class AddProject implements ActionListener {
 
-    private JTextField projectNameField;
+    private JTextField projectNameField; /* User input field for new project name */
 
+    /**
+     * Saves reference to component user will enter the new project name.
+     *
+     * @param projNameField     JTextField needed to enter new project name
+     */
     public AddProject(JTextField projNameField){
         this.projectNameField = projNameField;
     }
 
+    /**
+     * Triggered when user presses the add new project button. Extarcts data from
+     * saved JTextField and passes information to the database.
+     *
+     * @param e     Action which triggered method call
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         if(projectNameField.getText().equals(""))
