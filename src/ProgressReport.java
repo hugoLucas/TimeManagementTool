@@ -7,6 +7,11 @@ import java.util.ArrayList;
  * Created by Hugo on 11/14/2016.
  */
 public class ProgressReport implements ActionListener {
+    /**
+     * Generates a summary of project progress
+     *
+     * @param e     Action which triggered call
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         DB_Reader reader = new DB_Reader();

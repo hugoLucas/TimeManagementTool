@@ -7,15 +7,25 @@ import java.util.Calendar;
  */
 public class GenTimeSheet {
 
-    private String timeIntervalSelected;
-    private int projectIDSeleted;
-    private int taskIDSelected;
-    private int employeeStatus;     /* 0 if not manager, 1 if manager */
-    private int employeeID;
+    private String timeIntervalSelected;    /* String representation of interval selected (month, week, year) */
+    private int projectIDSeleted;           /* Integer identification number of the project selected */
+    private int taskIDSelected;             /* Integer identification number of the task selected */
+    private int employeeStatus;             /* 0 if not manager, 1 if manager */
+    private int employeeID;                 /* Integer identification number of the employee selected */
 
-    private Date start;
-    private Date end;
+    private Date start;                     /* Date object used to mark start of interval */
+    private Date end;                       /* Date object used to mark end of interval */
 
+    /**
+     * Binds parameters to appropriate private field. Sets manager status to 0 if employee is developer and
+     * 1 if employee is a manager. Initialises data objects to null.
+     *
+     * @param status                integer value signifying the employee's rank
+     * @param employeeNumber        employee identification number
+     * @param projID                project identification number
+     * @param taskID                task identification number
+     * @param timeInt               string representation of interval selected
+     */
     public GenTimeSheet(String status, int employeeNumber, int projID, int taskID, String timeInt){
         if(status.equals("Manager"))
             this.employeeStatus = 1;
@@ -31,6 +41,11 @@ public class GenTimeSheet {
         this.end = null;
     }
 
+    /**
+     * Calls different internal method depending on rank of calling object
+     *
+     * @return      StringBuilder object that contains time sheet
+     */
     public StringBuilder createReport(){
         this.intervalToDates();
 
@@ -40,6 +55,12 @@ public class GenTimeSheet {
             return this.createDevReport();
     }
 
+    /**
+     * Creates a developer timesheet report. Passes internal fields to database reader which then generates a list
+     * of EmployeeTimeLogs. Internal call to listToBuilder transforms list to StringBuilder object.
+     *
+     * @return      StringBuilder containing report
+     */
     private StringBuilder createDevReport(){
         DB_Reader reader = new DB_Reader();
         ArrayList<EmployeeLog> recs = reader.genEmployeeTimeSheet(employeeID, projectIDSeleted, taskIDSelected, start, end);
@@ -47,6 +68,12 @@ public class GenTimeSheet {
         return this.listToBuilder(recs);
     }
 
+    /**
+     * Creates a manager timesheet report. Passes internal fields to database reader which then generates a list
+     * of EmployeeTimeLogs. Internal call to listToBuilder transforms list to StringBuilder object.
+     *
+     * @return      StringBuilder containing report
+     */
     private StringBuilder createManagerReport(){
         DB_Reader reader = new DB_Reader();
         ArrayList<EmployeeLog> recs = reader.genManagerTimeSheet(employeeID, projectIDSeleted, taskIDSelected, start, end);
@@ -54,6 +81,12 @@ public class GenTimeSheet {
         return this.listToBuilder(recs);
     }
 
+    /**
+     * Converts a list of EmployeeLogs into a StringBuilder object
+     *
+     * @param lis       ArrayList to transform
+     * @return          StringBuilder
+     */
     private StringBuilder listToBuilder(ArrayList<EmployeeLog> lis){
         if(lis.size() > 0) {
             StringBuilder out = new StringBuilder();
@@ -68,6 +101,10 @@ public class GenTimeSheet {
         }
     }
 
+    /**
+     * Using a Calendar object, method converts a String representation of a time interval into
+     * two Date objects which mark the begining and end of that interval
+     */
     private void intervalToDates(){
         long intervalStartTime = System.currentTimeMillis();
         long intervalEndTime = 0;
