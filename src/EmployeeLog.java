@@ -6,11 +6,11 @@ import java.sql.Time;
  */
 public class EmployeeLog {
 
-    private Time clockIn;
-    private Time clockOut;
-    private Date logDate;
-    private int taskID;
-    private int employeeID;
+    private Time clockIn;       /* Time log was created */
+    private Time clockOut;      /* Time log ended */
+    private Date logDate;       /* Date log was created */
+    private int taskID;         /* Task log is associated with */
+    private int employeeID;     /* Employee identification number of employee who created the log*/
 
     /**
      * Creates an EmployeeLog with the given parameters.

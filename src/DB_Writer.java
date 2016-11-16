@@ -1,17 +1,18 @@
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Hugo Lucas on 11/4/2016.
  */
 public class DB_Writer {
 
-    private Connection writer_connection;   //Always use connection in shortest possible scope
-    static private String db_username;
-    static private String db_password;
-    static private String url;
+    private Connection writer_connection;       /* Connection used by all methods to access database */
+    static private String db_username;          /* Username used to access database */
+    static private String db_password;          /* Password used to access database */
+    static private String url;                  /* Connection url to connect to database */
 
+    /**
+     *  Constructor, initialises private fields with default database login credentials
+     */
     public DB_Writer(){
         this.db_username = "root";
         this.db_password = "mysql";
@@ -19,6 +20,12 @@ public class DB_Writer {
         this.url = "jdbc:mysql://localhost:3306/time_management_system";
     }
 
+    /**
+     * Creates a new time log in the database in order to clock in the given employee.
+     *
+     * @param employeeNumber    employee identification number of the employee that is clocking in
+     * @param taskID            the task identification number of the task the employee is going to work on
+     */
     public void clockInUser(int employeeNumber, int taskID){
         long currentMilliTime = System.currentTimeMillis();
         Time clockInTime = new Time(currentMilliTime);
@@ -26,7 +33,7 @@ public class DB_Writer {
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.writer_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepare query to database */
@@ -66,7 +73,7 @@ public class DB_Writer {
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.writer_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             String differenceQuery = "SELECT TimeIn, Date FROM time_logs WHERE EmployeeID = ? AND TaskID = ? AND TimeOut IS NULL";
@@ -121,11 +128,19 @@ public class DB_Writer {
         }
     }
 
-    public void addEmployee(String firstName, String lastName, Date hireDate, int managerStatus/*, List<String> assignedProjects*/){
+    /**
+     * Adds a new employee to the database.
+     *
+     * @param firstName         first name of the new employee
+     * @param lastName          last name of the new employee
+     * @param hireDate          hire date of the new employee
+     * @param managerStatus     rank of the new employee
+     */
+    public void addEmployee(String firstName, String lastName, Date hireDate, int managerStatus){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.writer_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepare query to database */
@@ -154,11 +169,18 @@ public class DB_Writer {
         }
     }
 
+    /**
+     * Creates a new task in the database and then binds that task to a project.
+     *
+     * @param newTaskName           the name of the new task
+     * @param projectSelected       the project that task will be bound to
+     * @param hourEstimate          the estimated man hours needed to complete task
+     */
     public void addTask(String newTaskName, String projectSelected, int hourEstimate){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.writer_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepare query to database */
@@ -192,11 +214,16 @@ public class DB_Writer {
         }
     }
 
+    /**
+     * Adds a new project to the database
+     *
+     * @param projectName   the name of the new project to add
+     */
     public void addProject(String projectName){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.writer_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepare query to database */
@@ -219,11 +246,22 @@ public class DB_Writer {
         }
     }
 
+    /**
+     * Sets login credentials for newly added employees. Only works if the data provided is associated with
+     * an employee that exists in the database but does not have a username and password.
+     *
+     * @param firstName     first name of newly hired employee
+     * @param lastName      last name of the newly hired employee
+     * @param dateHired     the date the employee was hired
+     * @param userName      the desired username
+     * @param passWord      the desired password
+     * @return              1 if login crednentials are created, -1 if employee already has login credentials
+     */
     public int createLogin(String firstName, String lastName, Date dateHired, String userName, String passWord){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.writer_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             String inspectionQuery = "SELECT login.Username FROM login WHERE login.EmployeeID = ( SELECT employee.EmployeeID FROM employee " +
@@ -266,11 +304,17 @@ public class DB_Writer {
         }
     }
 
+    /**
+     * Binds a task with a given identification number to a project.
+     *
+     * @param taskID        task identification number of the task to bind
+     * @param projectID     project identification number of the project task will be bound to
+     */
     public void assignTask(int taskID, int projectID){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.writer_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepare query to database */
@@ -295,11 +339,18 @@ public class DB_Writer {
 
     }
 
+    /**
+     * Changes the work status of an employee in order to track whether that employee is currently
+     * clocked in or out.
+     *
+     * @param employeeNumber        employee identification number of the employee who's status will change
+     * @param newStatus             final value of work status
+     */
     public void setWorkStatus(int employeeNumber, int newStatus){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.writer_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepare query to database */
@@ -323,11 +374,18 @@ public class DB_Writer {
         }
     }
 
+
+    /**
+     * Assigns the given task to an employee by altering the mapping in the database.
+     *
+     * @param taskID        task identification number of the task to assign
+     * @param employeeID    employee identification number of the employee task will be assigned to
+     */
     public void assignTaskToEmployee(int taskID, int employeeID){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection writer_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.writer_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepare query to database */

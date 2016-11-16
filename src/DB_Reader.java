@@ -85,7 +85,7 @@ public class DB_Reader {
     public ArrayList<Employee> allEmployees() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
             String query = "SELECT EmployeeID, FirstName, LastName, EndDate FROM employee";
             PreparedStatement stmt = reader_connection.prepareStatement(query);
             ResultSet queryResult = stmt.executeQuery();
@@ -131,7 +131,7 @@ public class DB_Reader {
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepares query for get all tasks for a given employee */
@@ -184,7 +184,7 @@ public class DB_Reader {
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepares query to get task in row with null timeout*/
@@ -237,7 +237,7 @@ public class DB_Reader {
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepares query to get task in row with null timeout*/
@@ -310,7 +310,7 @@ public class DB_Reader {
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepares query to get task in row with null timeout*/
@@ -396,7 +396,7 @@ public class DB_Reader {
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             /* Prepares query to get task in row with null timeout*/
@@ -438,7 +438,7 @@ public class DB_Reader {
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             String reportQuery = "select p.ProjectID, sum(t.EstimatedTimel) as TimeEstimate, sum(t.TimeWorked) as TimeWorked" +
@@ -482,7 +482,7 @@ public class DB_Reader {
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
-            Connection reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
             String taskQuery = "SELECT TaskID, TaskName FROM tasks WHERE taskID NOT IN (" +

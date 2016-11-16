@@ -6,16 +6,14 @@
  */
 public class EmployeeProject
 {
-    //String varaible representing the name of the project.
-    private String projectName;
-    //String variable representing the ID of the project.
-    private int projectID;
+    private String projectName;     /* String varaible representing the name of the project */
+    private int projectID;          /* String variable representing the ID of the project */
 
     /**
-     * This is the constructor that initializes the new object being made by setting the project name and its ID.
+     * Constructor initializes the new object being made by setting the project name and its ID.
      *
-     * @param projName
-     * @param projID
+     * @param projName  the name of the project created
+     * @param projID    the identification number of the project created
      */
     public EmployeeProject(String projName, int projID){
         this.projectName = projName;
