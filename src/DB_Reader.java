@@ -441,7 +441,7 @@ public class DB_Reader {
             this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
             /* Boiler plate to create class and establish connection */
 
-            String reportQuery = "select p.ProjectID, sum(t.EstimatedTimel) as TimeEstimate, sum(t.TimeWorked) as TimeWorked" +
+            String reportQuery = "select p.ProjectID, sum(t.TimeEstimate) as TimeEstimate, sum(t.TimeWorked) as TimeWorked" +
                     " from tasks as t, project_task_map as p where p.TaskID = t.TaskID group by p.ProjectID";
             PreparedStatement reportStmt = reader_connection.prepareStatement(reportQuery);
             ResultSet reportSet = reportStmt.executeQuery();

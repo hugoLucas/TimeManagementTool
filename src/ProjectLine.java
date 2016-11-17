@@ -46,4 +46,15 @@ public class ProjectLine {
         return ret.toString();
     }
 
+    public String getProjectName(){
+        return this.projectName;
+    }
+
+    public int getHoursWorkedOnProject(){
+        return this.hoursWorkedOnProject;
+    }
+
+    public int getEstimatedHoursToCompletion(){
+        return this.estimatedHoursToCompletion;
+    }
 }

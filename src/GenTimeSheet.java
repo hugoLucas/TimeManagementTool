@@ -46,13 +46,13 @@ public class GenTimeSheet {
      *
      * @return      StringBuilder object that contains time sheet
      */
-    public StringBuilder createReport(){
+    public void createReport(){
         this.intervalToDates();
 
         if(employeeStatus > 0)
-            return this.createManagerReport();
+            this.createManagerReport();
         else
-            return this.createDevReport();
+            this.createDevReport();
     }
 
     /**
@@ -61,11 +61,12 @@ public class GenTimeSheet {
      *
      * @return      StringBuilder containing report
      */
-    private StringBuilder createDevReport(){
+    private void createDevReport(){
         DB_Reader reader = new DB_Reader();
         ArrayList<EmployeeLog> recs = reader.genEmployeeTimeSheet(employeeID, projectIDSeleted, taskIDSelected, start, end);
 
-        return this.listToBuilder(recs);
+        TimeSheetReport rep = new TimeSheetReport(recs, false);
+        rep.buildReport();
     }
 
     /**
@@ -74,31 +75,12 @@ public class GenTimeSheet {
      *
      * @return      StringBuilder containing report
      */
-    private StringBuilder createManagerReport(){
+    private void createManagerReport(){
         DB_Reader reader = new DB_Reader();
         ArrayList<EmployeeLog> recs = reader.genManagerTimeSheet(employeeID, projectIDSeleted, taskIDSelected, start, end);
 
-        return this.listToBuilder(recs);
-    }
-
-    /**
-     * Converts a list of EmployeeLogs into a StringBuilder object
-     *
-     * @param lis       ArrayList to transform
-     * @return          StringBuilder
-     */
-    private StringBuilder listToBuilder(ArrayList<EmployeeLog> lis){
-        if(lis.size() > 0) {
-            StringBuilder out = new StringBuilder();
-            for (EmployeeLog el : lis) {
-                out.append(el.printLog());
-                out.append(System.getProperty("line.separator"));
-            }
-
-            return out;
-        }else{
-            return null;
-        }
+        TimeSheetReport rep = new TimeSheetReport(recs, true);
+        rep.buildReport();
     }
 
     /**

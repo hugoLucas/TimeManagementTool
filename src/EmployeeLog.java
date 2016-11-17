@@ -68,4 +68,49 @@ public class EmployeeLog {
             out = String.format("IN: %s OUT: %s DATE: %s TASK: %d EmployeeID: %d",clockIn.toString(), clockProxy, logDate.toString(), taskID, employeeID);
         return out;
     }
+
+    /**
+     * Simple getter method
+     *
+     * @return      Time object representing the start of the employee log
+     */
+    public Time getClockIn() {
+        return this.clockIn;
+    }
+
+    /**
+     * Simple getter method
+     *
+     * @return      Time object representing the end of the employee log
+     */
+    public Time getClockOut(){
+        return this.clockOut;
+    }
+
+    /**
+     * Simple getter method
+     *
+     * @return      Time object representing the date of the employee log
+     */
+    public Date getLogDate(){
+        return this.logDate;
+    }
+
+    /**
+     * Simple getter method
+     *
+     * @return      Time object representing the task associated with the employee log
+     */
+    public int getTaskID(){
+        return this.taskID;
+    }
+
+    /**
+     * Simple getter method
+     *
+     * @return      Time object representing the employee associated with the employee log
+     */
+    public int getEmployeeID(){
+        return this.employeeID;
+    }
 }

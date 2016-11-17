@@ -1,11 +1,12 @@
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import de.javasoft.plaf.synthetica.SyntheticaBlackMoonLookAndFeel;
 
 /**
  * Created by Hugo on 11/3/2016.
@@ -95,11 +96,6 @@ public class GUI_Layout extends JFrame{
     private JPasswordField newUserPasswordField;
     private JButton newUserCreateLoginButton;
     private JButton newUserBackButton;
-    private JPanel systemManBindTask;
-    private JButton systemManBTGen;
-    private JComboBox systemManBTTasksSel;
-    private JComboBox systemManBTProjSel;
-    private JButton systemManBTBind;
     private JButton systemManCPBack;
     private JButton systemManBTBack;
     private JButton timeSheetManProgressReportButton;
@@ -152,7 +148,6 @@ public class GUI_Layout extends JFrame{
         systemManBackButton.addActionListener(back_listener);
         systemManATBackButton.addActionListener(back_listener);
         systemManCPBack.addActionListener(back_listener);
-        systemManBTBack.addActionListener(back_listener);
         newUserBackButton.addActionListener(back_listener);
 
         GenTimeSheetButton timeSheetButton_listener = new GenTimeSheetButton();
@@ -279,6 +274,7 @@ public class GUI_Layout extends JFrame{
             taskProxy = timeSheetManTaskSelector;
             intProxy = timeSheetManIntervalSelector;
 
+            timeSheetManEmployeeSelector.removeAllItems();
             for(Employee e: logInObj.getAllEmployees())
                 timeSheetManEmployeeSelector.addItem(e.getName());
             timeSheetManEmployeeSelector.addItem("All Employees");
@@ -286,14 +282,17 @@ public class GUI_Layout extends JFrame{
 
         projectProxy.removeAllItems();
         taskProxy.removeAllItems();
-        for(String proj: projDropDown)
-            projectProxy.addItem(proj);
+        if (projectProxy.getItemCount() == 0) {
+            for(String proj: projDropDown)
+                projectProxy.addItem(proj);
+            projectProxy.addItem("All Projects");
+        }
 
-        for(String task: taskDropDown)
-            taskProxy.addItem(task);
-
-        projectProxy.addItem("All Projects");
-        taskProxy.addItem("All Tasks");
+        if (taskProxy.getItemCount() == 0) {
+            for (String task : taskDropDown)
+                taskProxy.addItem(task);
+            taskProxy.addItem("All Tasks");
+        }
         ActionListener timeSheetDevProjSelectorListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -581,11 +580,7 @@ public class GUI_Layout extends JFrame{
 
             GenTimeSheet genHelper = new GenTimeSheet(rank, empProxy, projectOption, taskOption, timeIntervalSelected);
 
-            StringBuilder genList = genHelper.createReport();
-            if(genList != null)
-                JOptionPane.showMessageDialog(null, genList.toString());
-            else
-                JOptionPane.showMessageDialog(null, "NO RESULTS FOUND");
+            genHelper.createReport();
         }
     }
 
@@ -598,16 +593,30 @@ public class GUI_Layout extends JFrame{
         @Override
         public void actionPerformed(ActionEvent e) {
 
+            systemManAddTask.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    String tabName = systemManAddTask.getSelectedComponent().getName();
+                    if(tabName.equals("AssignTask"))
+                        setSize(350,400);
+                    else if(tabName.equals("AddProject"))
+                        setSize(350,300);
+                    else if(tabName.equals("AddTask"))
+                        setSize(350,350);
+                    else if(tabName.equals("AddEmployee"))
+                        setSize(350,400);
+                }
+            });
+
             systemManATAddTask.addActionListener(new AddTask(systemManATProjectSelector, systemManATTaskName, systemManATEstimateTime, map.getProjects()));
             systemManAPAddProject.addActionListener(new AddEmployee(systemManFirstNameTextField, systemManLastNameTextField,
                     systemManHireDateTextField, systemManGroupSelector));
             systemManCPCreateProject.addActionListener(new AddProject(systemManCPProjectName));
-            systemManBTBind.addActionListener(new BindTask(systemManBTGen, systemManBTTasksSel, systemManBTProjSel, map));
             systemManAsTGenButton.addActionListener(new AssignTask(systemManAsTEmployeeSelector, systemManAsTTaskSelector, systemManAstAssignButton));
 
             CardLayout layout = (CardLayout) (cardStack.getLayout());
             layout.show(cardStack, "systemMan");
-            setSize(500,400);
+            setSize(350,400);
         }
     }
 
