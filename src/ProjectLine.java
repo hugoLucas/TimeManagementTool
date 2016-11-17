@@ -3,12 +3,21 @@
  */
 public class ProjectLine {
 
-    private int projectID;
-    private String projectName;
-    private int hoursWorkedOnProject;
-    private int estimatedHoursToCompletion;
-    private int percentDone;
+    private int projectID;                      /* Project identification number */
+    private String projectName;                 /* Project name */
+    private int hoursWorkedOnProject;           /* Man hours spent on project */
+    private int estimatedHoursToCompletion;     /* Estimated man hours needed to complete project */
+    private int percentDone;                    /* Percent project is done based on man hours worked */
 
+
+    /**
+     * Binds parameters to appropriate private fields
+     *
+     * @param projectID         identification number of new project
+     * @param projectName       name of new project
+     * @param hoursWorked       hours spent on new project
+     * @param hourEstimate      estimate of total hours needed to complete new project
+     */
     public ProjectLine(int projectID, String projectName, int hoursWorked, int hourEstimate){
         this.projectID = projectID;
         this.projectName = projectName;
@@ -17,6 +26,11 @@ public class ProjectLine {
         this.percentDone = this.hoursWorkedOnProject/this.estimatedHoursToCompletion;
     }
 
+    /**
+     * Formats and returns private fields in String form
+     *
+     * @return      String summary of private fields
+     */
     public String printReport(){
         StringBuilder ret = new StringBuilder();
 

@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import de.javasoft.plaf.synthetica.SyntheticaBlackMoonLookAndFeel;
 
 /**
  * Created by Hugo on 11/3/2016.
@@ -120,7 +121,7 @@ public class GUI_Layout extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
         setLocationRelativeTo(null);
-        setSize(400,200);
+        setSize(400,250);
         setResizable(false);
         setVisible(true);
 
@@ -513,10 +514,10 @@ public class GUI_Layout extends JFrame{
             Object source = e.getSource();
             if(logInObj == null) {
                 layout.show(cardStack, "Login");
-                setSize(400,200);
+                setSize(400,250);
             }else if (managerStatus == 0) {
                 layout.show(cardStack, clockedInOrOut);
-                setSize(400,200);
+                setSize(400,250);
             } else if( managerStatus == 1){
                 layout.show(cardStack,clockedInOrOut);
                 setSize(400,300);

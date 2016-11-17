@@ -1,4 +1,7 @@
+import de.javasoft.plaf.synthetica.SyntheticaBlackMoonLookAndFeel;
+
 import javax.swing.*;
+import java.text.ParseException;
 
 public class Main extends JApplet {
 
@@ -12,6 +15,11 @@ public class Main extends JApplet {
         /**
          * Object creates GUI and handles user input
          */
+        try {
+            UIManager.setLookAndFeel(new SyntheticaBlackMoonLookAndFeel());
+        } catch (Exception e) {
+            e.printStackTrace();}
+
         GUI_Layout d = new GUI_Layout();
     }
 

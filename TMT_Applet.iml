@@ -17,5 +17,26 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="com.google.cloud.sql:mysql-socket-factory:1.0.2" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/Desktop/syntheticaBlackMoon_2.9.6/syntheticaBlackMoon.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/Desktop/synthetica_2.20.1_eval/synthetica.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="synthetica" level="project" />
+    <orderEntry type="library" name="syntheticaBlackMoon" level="project" />
+    <orderEntry type="library" name="lib" level="project" />
   </component>
 </module>
