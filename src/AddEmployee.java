@@ -7,6 +7,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 /**
+ * This object is called whenever a Manager-level user accesses the Add Employee
+ * panel of the System page and opts to enter the information for a new employee
+ * and presses the Add New Employee Button. Handles the transfer to information
+ * from GUI components to the appropriate database writer method which will add
+ * the employee to the database.
+ *
  * Created by Hugo Lucas on 11/9/2016.
  */
 
