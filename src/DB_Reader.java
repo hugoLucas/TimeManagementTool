@@ -123,7 +123,7 @@ public class DB_Reader {
     /**
      * Generates a mapping of all task and project relationships in the database.
      *
-     * @param employee_number       I don't know...
+     * @param employee_number       Limits results
      * @return                      EmployeeProjectTaskMap which represents relationships between tasks and projects
      */
     public EmployeeProjectTaskMap projectTaskMap(int employee_number) {
@@ -135,8 +135,10 @@ public class DB_Reader {
             /* Boiler plate to create class and establish connection */
 
             /* Prepares query for get all tasks for a given employee */
-            String query = "SELECT * FROM tasks";
+            String query = "SELECT * FROM tasks WHERE tasks.TaskID IN (SELECT taskID" +
+                    " FROM employee_task_map WHERE EmployeeID = ?)";
             PreparedStatement taskStatement = reader_connection.prepareStatement(query);
+            taskStatement.setInt(1, employee_number);
             ResultSet taskQueryResult = taskStatement.executeQuery();
 
             while(taskQueryResult.next()){

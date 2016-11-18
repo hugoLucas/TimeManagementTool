@@ -1,7 +1,6 @@
 import de.javasoft.plaf.synthetica.SyntheticaBlackMoonLookAndFeel;
 
 import javax.swing.*;
-import java.text.ParseException;
 
 public class Main extends JApplet {
 

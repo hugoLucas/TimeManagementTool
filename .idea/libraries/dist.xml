@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="dist">
+    <CLASSES>
+      <root url="file://E:/lib/dynamicreports-4.1.1-project-with-dependencies/dynamicreports-4.1.1/dist" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://E:/lib/dynamicreports-4.1.1-project-with-dependencies/dynamicreports-4.1.1/dist" />
+    </SOURCES>
+    <jarDirectory url="file://E:/lib/dynamicreports-4.1.1-project-with-dependencies/dynamicreports-4.1.1/dist" recursive="false" />
+    <jarDirectory url="file://E:/lib/dynamicreports-4.1.1-project-with-dependencies/dynamicreports-4.1.1/dist" recursive="false" type="SOURCES" />
+  </library>
+</component>

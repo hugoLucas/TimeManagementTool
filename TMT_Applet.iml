@@ -7,49 +7,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/Program Files (x86)/MySQL/Connector.J 5.1/mysql-connector-java-5.1.39-bin.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="com.google.cloud.sql:mysql-socket-factory:1.0.2" level="project" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/Desktop/syntheticaBlackMoon_2.9.6/syntheticaBlackMoon.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/Desktop/synthetica_2.20.1_eval/synthetica.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="library" name="synthetica" level="project" />
+    <orderEntry type="library" name="synthetica_2.20" level="project" />
     <orderEntry type="library" name="syntheticaBlackMoon" level="project" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="file://$USER_HOME$/Desktop/dynamicreports-4.1.1-project-with-dependencies/dynamicreports-4.1.1/dist" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://$USER_HOME$/Desktop/dynamicreports-4.1.1-project-with-dependencies/dynamicreports-4.1.1/dist" />
-        </SOURCES>
-        <jarDirectory url="file://$USER_HOME$/Desktop/dynamicreports-4.1.1-project-with-dependencies/dynamicreports-4.1.1/dist" recursive="false" />
-        <jarDirectory url="file://$USER_HOME$/Desktop/dynamicreports-4.1.1-project-with-dependencies/dynamicreports-4.1.1/dist" recursive="false" type="SOURCES" />
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="dist" level="project" />
   </component>
 </module>

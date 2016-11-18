@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="synthetica_2.20">
+    <CLASSES>
+      <root url="file://E:/lib/synthetica_2.20.1_eval" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="file://E:/lib/synthetica_2.20.1_eval/api" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://E:/lib/synthetica_2.20.1_eval" />
+    </SOURCES>
+    <jarDirectory url="file://E:/lib/synthetica_2.20.1_eval" recursive="false" />
+    <jarDirectory url="file://E:/lib/synthetica_2.20.1_eval" recursive="false" type="SOURCES" />
+  </library>
+</component>

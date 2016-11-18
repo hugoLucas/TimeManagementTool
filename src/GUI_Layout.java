@@ -167,7 +167,7 @@ public class GUI_Layout extends JFrame{
      * Clock-In Screen by populating the dropdown menus present in both screens. Method also attaches listeners
      * to the Project Selector in order to display only Tasks associated with the user selected Project.
      */
-    public void setClockIDropdowns(){
+    public void setClockInDropdowns(){
         /* Gathers list of all projects/tasks available to current user */
         ArrayList<String> projDropDown = logInObj.projectList(map);
         ArrayList<String> taskDropDown = logInObj.tasksInProject(projDropDown.get(0), map);
@@ -175,13 +175,18 @@ public class GUI_Layout extends JFrame{
         /* Assigns developer/manager GUI components to proxies in order to reduce code duplication */
         JComboBox projectProxy = null;
         JComboBox taskProxy = null;
-        if(managerStatus == 1){ projectProxy = clockInManProjectSelector; taskProxy = clockInManTaskSelector; }
-        else{ projectProxy = clockInDevProjectSelector; taskProxy = clockInDevTaskSelector; }
+        if(managerStatus == 1){
+            projectProxy = clockInManProjectSelector;
+            taskProxy = clockInManTaskSelector; }
+        else{
+            projectProxy = clockInDevProjectSelector;
+            taskProxy = clockInDevTaskSelector; }
 
         /* Removes all items from ComboBoxes and refills them with appropriate values */
         projectProxy.removeAllItems();
         for(String proj: projDropDown)
             projectProxy.addItem(proj);
+
         taskProxy.removeAllItems();
         for(String task: taskDropDown)
             taskProxy.addItem(task);
@@ -371,12 +376,12 @@ public class GUI_Layout extends JFrame{
                     if(result[1] == 0) {
                         if (result[2] == 0) {
                             setClock(clockinDevTimer);
-                            setClockIDropdowns();
+                            setClockInDropdowns();
                             layout.show(cardStack, "ClockInDev");
                             clockedInOrOut = "ClockInDev";
                         }else{
                             setClock(clockInManTimer);
-                            setClockIDropdowns();
+                            setClockInDropdowns();
                             setSize(400,300);
                             layout.show(cardStack, "ClockInMan");
                             clockedInOrOut = "ClockInMan";
@@ -392,7 +397,7 @@ public class GUI_Layout extends JFrame{
                             setClock(clockOutManTimer);
                             int [] ids = logInObj.taskAndProjectIDs();
                             prepClockOutScreen(map.getProjectName(ids[1]), map.getTaskName(ids[0]));
-                            setSize(400,300);
+                            setSize(400,350);
                             layout.show(cardStack, "ClockOutMan");
                             clockedInOrOut = "ClockOutMan";
                         }
@@ -457,7 +462,7 @@ public class GUI_Layout extends JFrame{
                 clockOutUser.clockOut();
 
                 destroyClock();
-                setClockIDropdowns();
+                setClockInDropdowns();
                 setClock(clockinDevTimer);
                 layout.show(cardStack, "ClockInDev");
                 clockedInOrOut = "ClockInDev";
@@ -468,7 +473,7 @@ public class GUI_Layout extends JFrame{
                 clockOutUser.clockOut();
 
                 destroyClock();
-                setClockIDropdowns();
+                setClockInDropdowns();
                 setClock(clockInManTimer);
                 layout.show(cardStack, "ClockInMan");
                 clockedInOrOut = "ClockInMan";
