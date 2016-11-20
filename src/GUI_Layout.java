@@ -14,12 +14,13 @@ import java.util.Date;
 public class GUI_Layout extends JFrame{
 
     /* Global private variables */
-    private EmployeeProjectTaskMap map;     /* Maps project-task relationship */
+    private EmployeeProjectTaskMap PROJECT_TASK_MAPPING;     /* Maps project-task relationship */
     private Timer currentClockTimer;    /* Reference to JLabel current serving as proxy clock */
     private String clockedInOrOut;  /* Stores name of most recently used Clock-In/Clock-Out screen */
-    private userLogIn logInObj; /* Handles new user login and contains information regarding projects/tasks */
-    private int managerStatus;  /* Determines what rank a user is */
-    private int employeeID; /* Stores the employee identifer used by SQL database to track current user */
+    private LoginUserData LOGIN_HANDLER; /* Handles new user login and contains information regarding projects/tasks */
+    private int EMPLOYEE_RANK;  /* Determines what rank a user is */
+    private int EMPLOYEE_ID; /* Stores the employee identifer used by SQL database to track current user */
+    private boolean TIME_SHEET_FLAG = false;
 
 
     /* IntelliJ generated GUI components */
@@ -122,7 +123,11 @@ public class GUI_Layout extends JFrame{
         setVisible(true);
 
         /* Create and bind action listeners to respective buttons */
+
+        /* LoginScreen */
         loginLoginButton.addActionListener(new LoginButtonListener());
+
+
         loginNewEmployeeButton.addActionListener(new LoginNewUser());
 
         newUserCreateLoginButton.addActionListener(new CreateNewUser(newUserFirstName, newUserLastName,
@@ -169,13 +174,14 @@ public class GUI_Layout extends JFrame{
      */
     public void setClockInDropdowns(){
         /* Gathers list of all projects/tasks available to current user */
-        ArrayList<String> projDropDown = logInObj.projectList(map);
-        ArrayList<String> taskDropDown = logInObj.tasksInProject(projDropDown.get(0), map);
+        ArrayList<EmployeeProject> projDropDown = PROJECT_TASK_MAPPING.getProjects();
+        ArrayList<EmployeeTask> taskDropDown = PROJECT_TASK_MAPPING.getProjectTasks(
+                projDropDown.get(0).getProjectName());
 
         /* Assigns developer/manager GUI components to proxies in order to reduce code duplication */
         JComboBox projectProxy = null;
         JComboBox taskProxy = null;
-        if(managerStatus == 1){
+        if(EMPLOYEE_RANK == 1){
             projectProxy = clockInManProjectSelector;
             taskProxy = clockInManTaskSelector; }
         else{
@@ -184,35 +190,17 @@ public class GUI_Layout extends JFrame{
 
         /* Removes all items from ComboBoxes and refills them with appropriate values */
         projectProxy.removeAllItems();
-        for(String proj: projDropDown)
-            projectProxy.addItem(proj);
+        for(EmployeeProject proj: projDropDown)
+            projectProxy.addItem(proj.getProjectName());
 
         taskProxy.removeAllItems();
-        for(String task: taskDropDown)
-            taskProxy.addItem(task);
+        for(EmployeeTask task: taskDropDown)
+            taskProxy.addItem(task.getTaskName());
 
         /* Creates action listener that changes the tasks available for selection according to the project
         * selected by the user. Assures project/task selected have appropriate relationship */
-        ActionListener clockInProjSelectorListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(e.getSource() == clockInDevProjectSelector) {
-                    String projectSelected = (String) clockInDevProjectSelector.getSelectedItem();
-                    clockInDevTaskSelector.removeAllItems();
-
-                    for(String taskName: logInObj.tasksInProject(projectSelected, map))
-                        clockInDevTaskSelector.addItem(taskName);
-                }else{
-                    String projectSelected = (String) clockInManProjectSelector.getSelectedItem();
-                    clockInManTaskSelector.removeAllItems();
-
-                    for(String taskName: logInObj.tasksInProject(projectSelected, map))
-                        clockInManTaskSelector.addItem(taskName);
-                }
-            }
-        };
-
-        projectProxy.addActionListener(clockInProjSelectorListener);
+        MatchProjectToTask projectSelectionListener = new MatchProjectToTask();
+        projectProxy.addActionListener(projectSelectionListener);
     }
 
     /**
@@ -223,10 +211,10 @@ public class GUI_Layout extends JFrame{
      * @param taskSel   the name of the current task the user is working on
      */
     public void prepClockOutScreen(String projSel, String taskSel){
-        if (managerStatus == 0) {
+        if (EMPLOYEE_RANK == 0) {
             clockOutDevCurrentProject.setText(projSel);
             clockOutDevCurrentTask.setText(taskSel);
-        }else if(managerStatus == 1){
+        }else if(EMPLOYEE_RANK == 1){
             clockOutManCurrentProject.setText(projSel);
             clockOutManCurrentTask.setText(taskSel);
         }
@@ -264,23 +252,24 @@ public class GUI_Layout extends JFrame{
      * each as well as attaching listeners to the selectors.
      */
     public void prepTimeSheet(){
-        ArrayList<String> projDropDown = logInObj.projectList(map);
-        ArrayList<String> taskDropDown = logInObj.tasksInProject(projDropDown.get(0), map);
+        ArrayList<EmployeeProject> projDropDown = PROJECT_TASK_MAPPING.getProjects();
+        ArrayList<EmployeeTask> taskDropDown = PROJECT_TASK_MAPPING.getProjectTasks(
+                projDropDown.get(0).getProjectName());
 
         JComboBox projectProxy = null;
         JComboBox taskProxy = null;
         JComboBox intProxy = null;
-        if(managerStatus == 0){
+        if(EMPLOYEE_RANK == 0){
             projectProxy = timeSheetDevProjectSelector;
             taskProxy = timeSheetDevTaskSelector;
             intProxy = timeSheetDevIntervalSelector;
-        }else if(managerStatus == 1){
+        }else if(EMPLOYEE_RANK == 1){
             projectProxy = timeSheetManProjectSelector;
             taskProxy = timeSheetManTaskSelector;
             intProxy = timeSheetManIntervalSelector;
 
             timeSheetManEmployeeSelector.removeAllItems();
-            for(Employee e: logInObj.getAllEmployees())
+            for(Employee e: LOGIN_HANDLER.getAllEmployees())
                 timeSheetManEmployeeSelector.addItem(e.getName());
             timeSheetManEmployeeSelector.addItem("All Employees");
         }
@@ -288,14 +277,14 @@ public class GUI_Layout extends JFrame{
         projectProxy.removeAllItems();
         taskProxy.removeAllItems();
         if (projectProxy.getItemCount() == 0) {
-            for(String proj: projDropDown)
-                projectProxy.addItem(proj);
+            for(EmployeeProject proj: projDropDown)
+                projectProxy.addItem(proj.getProjectName());
             projectProxy.addItem("All Projects");
         }
 
         if (taskProxy.getItemCount() == 0) {
-            for (String task : taskDropDown)
-                taskProxy.addItem(task);
+            for (EmployeeTask task : taskDropDown)
+                taskProxy.addItem(task.getTaskName());
             taskProxy.addItem("All Tasks");
         }
         ActionListener timeSheetDevProjSelectorListener = new ActionListener() {
@@ -311,8 +300,8 @@ public class GUI_Layout extends JFrame{
                         }else{
                             timeSheetDevTaskSelector.removeAllItems();
 
-                            for (String taskName : logInObj.tasksInProject(projectSelected, map))
-                                timeSheetDevTaskSelector.addItem(taskName);
+                            for (EmployeeTask t : PROJECT_TASK_MAPPING.getProjectTasks(projectSelected))
+                                timeSheetDevTaskSelector.addItem(t.getTaskName());
 
                             timeSheetDevTaskSelector.addItem("All Tasks");
                         }
@@ -327,8 +316,8 @@ public class GUI_Layout extends JFrame{
                         }else{
                             timeSheetManTaskSelector.removeAllItems();
 
-                            for (String taskName : logInObj.tasksInProject(projectSelected, map))
-                                timeSheetManTaskSelector.addItem(taskName);
+                            for (EmployeeTask t : PROJECT_TASK_MAPPING.getProjectTasks(projectSelected))
+                                timeSheetManTaskSelector.addItem(t.getTaskName());
 
                             timeSheetManTaskSelector.addItem("All Tasks");
                         }
@@ -342,6 +331,8 @@ public class GUI_Layout extends JFrame{
         intProxy.addItem("Current Week");
         intProxy.addItem("Current Month");
         intProxy.addItem("Current Year");
+
+        this.TIME_SHEET_FLAG = true;
     }
 
 
@@ -357,51 +348,44 @@ public class GUI_Layout extends JFrame{
          */
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == loginLoginButton){
-                logInObj = new userLogIn();
-                logInObj.login(loginUsername.getText(), String.valueOf(loginPassword.getPassword()));
-                int [] result = logInObj.results();
+            LoginUserData loginObject = new LoginUserData();
+            int [] authenticationResult = loginObject.authenticate(loginUsername.getText(),
+                    String.valueOf(loginPassword.getPassword()));
 
-                if(result[0] == -2){
-                    JOptionPane.showMessageDialog(null, "Unable to connect to CloudSQL!");
-                }else if (result[0] == -1){
-                    JOptionPane.showMessageDialog(null, "Invalid username and passowrd combination, please try again.");
-                }else{
-                    employeeID = result[0];
-                    if(map == null)
-                        map = logInObj.populateDropDown(result[0]);
+            GUI_Logic_Login loginHandler = new GUI_Logic_Login();
 
-                    managerStatus = result[2];
-                    CardLayout layout = (CardLayout) (cardStack.getLayout());
-                    if(result[1] == 0) {
-                        if (result[2] == 0) {
-                            setClock(clockinDevTimer);
-                            setClockInDropdowns();
-                            layout.show(cardStack, "ClockInDev");
-                            clockedInOrOut = "ClockInDev";
-                        }else{
-                            setClock(clockInManTimer);
-                            setClockInDropdowns();
-                            setSize(400,300);
-                            layout.show(cardStack, "ClockInMan");
-                            clockedInOrOut = "ClockInMan";
-                        }
-                    }else{
-                        if (result[2] == 0) {
-                            setClock(clockOutDevClock);
-                            int [] ids = logInObj.taskAndProjectIDs();
-                            prepClockOutScreen(map.getProjectName(ids[1]), map.getTaskName(ids[0]));
-                            layout.show(cardStack, "ClockOutDev");
-                            clockedInOrOut = "ClockOutDev";
-                        }else{
-                            setClock(clockOutManTimer);
-                            int [] ids = logInObj.taskAndProjectIDs();
-                            prepClockOutScreen(map.getProjectName(ids[1]), map.getTaskName(ids[0]));
-                            setSize(400,350);
-                            layout.show(cardStack, "ClockOutMan");
-                            clockedInOrOut = "ClockOutMan";
-                        }
-                    }
+            if(loginHandler.acceptLogin(authenticationResult)) {
+                LOGIN_HANDLER = loginObject;
+                EMPLOYEE_ID = authenticationResult[0];
+                EMPLOYEE_RANK = authenticationResult[2];
+                PROJECT_TASK_MAPPING = loginObject.gatherMappingInformation(
+                        authenticationResult[0]);
+
+                CardLayout layout = (CardLayout) (cardStack.getLayout());
+                JLabel timeLabelList [] = {clockinDevTimer, clockInManTimer,
+                        clockOutDevClock, clockOutManTimer};
+                JLabel timeLabel = loginHandler.determineTimeLabel(timeLabelList);
+
+                String screenNameList [] = {"ClockInDev", "ClockInMan",
+                        "ClockOutDev", "ClockOutMan"};
+                String nextScreenName = loginHandler.determineNextScreenName(screenNameList);
+
+                layout.show(cardStack, nextScreenName);
+                setClock(timeLabel);
+
+                if (authenticationResult[1] == 0) {
+                    if(authenticationResult[2] != 0)
+                        setSize(400, 300);
+
+                    setClockInDropdowns();
+                } else {
+                    int[] taskProjectIDNumbers = LOGIN_HANDLER.taskAndProjectIDs();
+                    prepClockOutScreen(PROJECT_TASK_MAPPING.getProjectName(
+                            taskProjectIDNumbers[1]),
+                            PROJECT_TASK_MAPPING.getTaskName(taskProjectIDNumbers[0]));
+
+                    if(authenticationResult[2] == 0)
+                        setSize(400, 350);
                 }
             }
         }
@@ -418,29 +402,31 @@ public class GUI_Layout extends JFrame{
         @Override
         public void actionPerformed(ActionEvent e){
             CardLayout layout = (CardLayout) (cardStack.getLayout());
+            String projectSelected = "";
+            String taskSelected = "";
+            JLabel clockLabel = null;
+            String panelName = "";
+
             if(e.getSource() == clockInDevClockInButton){
-                String projectSelected = (String) clockInDevProjectSelector.getSelectedItem();
-                String taskSelected = (String) clockInDevTaskSelector.getSelectedItem();
-                userClockIn clockInUser = new userClockIn(employeeID, map.getTaskID(taskSelected));
-                clockInUser.clockIn();
-
-                destroyClock();
-                prepClockOutScreen(projectSelected, taskSelected);
-                setClock(clockOutDevClock);
-                layout.show(cardStack, "ClockOutDev");
-                clockedInOrOut = "ClockOutDev";
+                projectSelected = (String) clockInDevProjectSelector.getSelectedItem();
+                taskSelected = (String) clockInDevTaskSelector.getSelectedItem();
+                clockLabel = clockOutDevClock;
+                panelName = "ClockOutDev";
             }else if(e.getSource() == clockInManClockInButton){
-                String projectSelected = (String) clockInManProjectSelector.getSelectedItem();
-                String taskSelected = (String) clockInManTaskSelector.getSelectedItem();
-                userClockIn clockInUser = new userClockIn(employeeID, map.getTaskID(taskSelected));
-                clockInUser.clockIn();
-
-                destroyClock();
-                prepClockOutScreen(projectSelected, taskSelected);
-                setClock(clockOutManTimer);
-                layout.show(cardStack, "ClockOutMan");
-                clockedInOrOut = "ClockOutMan";
+                projectSelected = (String) clockInManProjectSelector.getSelectedItem();
+                taskSelected = (String) clockInManTaskSelector.getSelectedItem();
+                clockLabel = clockOutManTimer;
+                panelName = "ClockOutMan";
             }
+
+            ClockInUser clockInUser = new ClockInUser(EMPLOYEE_ID, PROJECT_TASK_MAPPING.getTaskID(taskSelected));
+            clockInUser.clockIn();
+            destroyClock();
+
+            prepClockOutScreen(projectSelected, taskSelected);
+            setClock(clockLabel);
+            layout.show(cardStack, panelName);
+            clockedInOrOut = panelName;
         }
     }
 
@@ -455,29 +441,25 @@ public class GUI_Layout extends JFrame{
         @Override
         public void actionPerformed(ActionEvent e) {
             CardLayout layout = (CardLayout) (cardStack.getLayout());
+            String taskSelected = "";
+            String screeName = "";
             if(e.getSource() == clockOutDevClockOutButton){
-                String taskSelected = clockOutDevCurrentTask.getText();
-
-                userClockOut clockOutUser = new userClockOut(employeeID, map.getTaskID(taskSelected));
-                clockOutUser.clockOut();
-
-                destroyClock();
-                setClockInDropdowns();
+                taskSelected = clockOutDevCurrentTask.getText();
                 setClock(clockinDevTimer);
-                layout.show(cardStack, "ClockInDev");
-                clockedInOrOut = "ClockInDev";
+                screeName = "ClockInDev";
             }else if(e.getSource() == clockOutManClockOutButton){
-                String taskSelected = clockOutManCurrentTask.getText();
-
-                userClockOut clockOutUser = new userClockOut(employeeID, map.getTaskID(taskSelected));
-                clockOutUser.clockOut();
-
-                destroyClock();
-                setClockInDropdowns();
+                taskSelected = clockOutManCurrentTask.getText();
                 setClock(clockInManTimer);
-                layout.show(cardStack, "ClockInMan");
-                clockedInOrOut = "ClockInMan";
+                screeName = "ClockInMan";
             }
+
+            ClockOutUser clockOutUser = new ClockOutUser(EMPLOYEE_ID, PROJECT_TASK_MAPPING.getTaskID(taskSelected));
+            clockOutUser.clockOut();
+
+            destroyClock();
+            setClockInDropdowns();
+            layout.show(cardStack, screeName);
+            clockedInOrOut = screeName;
         }
     }
 
@@ -494,14 +476,15 @@ public class GUI_Layout extends JFrame{
             CardLayout layout = (CardLayout) (cardStack.getLayout());
             Object source = e.getSource();
             if (source == clockInDevTimeSheetButton || source== clockOutDevTimeSheetButton) {
-                prepTimeSheet();
                 layout.show(cardStack, "timeSheetDev");
                 setSize(400,300);
             } else if( source == clockInManTimeSheetsButton || source == clockOutManTimeSheetsButton){
-                prepTimeSheet();
-                setSize(400,400);
                 layout.show(cardStack, "timeSheetMan");
+                setSize(400,400);
             }
+
+            if(!TIME_SHEET_FLAG)
+                prepTimeSheet();
         }
     }
 
@@ -515,14 +498,13 @@ public class GUI_Layout extends JFrame{
         @Override
         public void actionPerformed(ActionEvent e) {
             CardLayout layout = (CardLayout) (cardStack.getLayout());
-            Object source = e.getSource();
-            if(logInObj == null) {
+            if(LOGIN_HANDLER == null) {
                 layout.show(cardStack, "Login");
                 setSize(400,250);
-            }else if (managerStatus == 0) {
+            }else if (EMPLOYEE_RANK == 0) {
                 layout.show(cardStack, clockedInOrOut);
                 setSize(400,250);
-            } else if( managerStatus == 1){
+            } else if( EMPLOYEE_RANK == 1){
                 layout.show(cardStack,clockedInOrOut);
                 setSize(400,300);
             }
@@ -545,13 +527,13 @@ public class GUI_Layout extends JFrame{
             JComboBox intProxy = null;
             int empProxy = -1;
             String rank = null;
-            if(managerStatus == 0){
+            if(EMPLOYEE_RANK == 0){
                 projectProxy = timeSheetDevProjectSelector;
                 taskProxy = timeSheetDevTaskSelector;
                 intProxy = timeSheetDevIntervalSelector;
-                empProxy = employeeID;
+                empProxy = EMPLOYEE_ID;
                 rank = "Developer";
-            }else if(managerStatus == 1){
+            }else if(EMPLOYEE_RANK == 1){
                 projectProxy = timeSheetManProjectSelector;
                 taskProxy = timeSheetManTaskSelector;
                 intProxy = timeSheetManIntervalSelector;
@@ -561,7 +543,7 @@ public class GUI_Layout extends JFrame{
                 if(employeeSelected.equals("All Employees"))
                     empProxy = 0;
                 else
-                    empProxy = logInObj.getEmployeeNumberByName(employeeSelected);
+                    empProxy = LOGIN_HANDLER.getEmployeeNumberByName(employeeSelected);
 
                 rank = "Manager";
             }
@@ -575,12 +557,12 @@ public class GUI_Layout extends JFrame{
                 projectOption = 0;
                 taskOption = 0;
             } else
-                projectOption = map.getProjectID(projectSelected);
+                projectOption = PROJECT_TASK_MAPPING.getProjectID(projectSelected);
 
             if(taskSelected.equals("All Tasks"))
                 taskOption = 0;
             else
-                taskOption = map.getTaskID(taskSelected);
+                taskOption = PROJECT_TASK_MAPPING.getTaskID(taskSelected);
 
 
             GenTimeSheet genHelper = new GenTimeSheet(rank, empProxy, projectOption, taskOption, timeIntervalSelected);
@@ -613,15 +595,153 @@ public class GUI_Layout extends JFrame{
                 }
             });
 
-            systemManATAddTask.addActionListener(new AddTask(systemManATProjectSelector, systemManATTaskName, systemManATEstimateTime, map.getProjects()));
-            systemManAPAddProject.addActionListener(new AddEmployee(systemManFirstNameTextField, systemManLastNameTextField,
-                    systemManHireDateTextField, systemManGroupSelector));
-            systemManCPCreateProject.addActionListener(new AddProject(systemManCPProjectName));
-            systemManAsTGenButton.addActionListener(new AssignTask(systemManAsTEmployeeSelector, systemManAsTTaskSelector, systemManAstAssignButton));
+            for(EmployeeProject p: PROJECT_TASK_MAPPING.getProjects())
+                systemManATProjectSelector.addItem(p.getProjectName());
+
+            systemManATAddTask.addActionListener(new AddTaskListener());
+            systemManAPAddProject.addActionListener(new AddEmployeeListener());
+            systemManCPCreateProject.addActionListener(new AddProjectListener());
+            systemManAsTGenButton.addActionListener(new AssignTaskGenerateButtonListener());
+            systemManAstAssignButton.addActionListener(new AssignTaskListener());
+            systemManAsTEmployeeSelector.addActionListener(new AssignTaskEmployeeListener());
 
             CardLayout layout = (CardLayout) (cardStack.getLayout());
             layout.show(cardStack, "systemMan");
             setSize(350,400);
+        }
+    }
+
+    private class AddTaskListener implements ActionListener{
+
+        public void actionPerformed(ActionEvent e) {
+            if(systemManATTaskName.getText().equals(""))
+                JOptionPane.showMessageDialog(null, "Please enter a valid task name");
+            else{
+                try {
+                    String projectSelected = (String) systemManATProjectSelector.getSelectedItem();
+                    int hoursSelected = Integer.parseInt(systemManATEstimateTime.getText());
+                    String taskSelected = systemManATTaskName.getText();
+
+                    AddTask atObj = new AddTask(projectSelected, taskSelected, hoursSelected);
+                    boolean result = atObj.addTaskToDatabase();
+
+                    if(result)
+                        JOptionPane.showMessageDialog(null, "Addition Successful");
+                    else
+                        JOptionPane.showMessageDialog(null, "Error: Please try again!");
+
+                } catch (NumberFormatException e1) {
+                    JOptionPane.showMessageDialog(null, "Please enter a valid number");
+                }
+            }
+        }
+    }
+
+    private class AddEmployeeListener implements ActionListener{
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String firstNameEntered = systemManFirstNameTextField.getText();
+            String lastNameEntered = systemManLastNameTextField.getText();
+            String startDateEntered = systemManHireDateTextField.getText();
+            int groupSelected = systemManGroupSelector.getSelectedIndex();
+
+            AddEmployee adObj = new AddEmployee(firstNameEntered, lastNameEntered,
+                    startDateEntered, groupSelected);
+            int result = adObj.addEmployeeToDatabase();
+
+            if(result == -1)
+                JOptionPane.showMessageDialog(null, "Invalid date entry, please try again");
+            else if(result == 0)
+                JOptionPane.showMessageDialog(null, "Error: Please try again!");
+            else if(result == 1)
+                JOptionPane.showMessageDialog(null, "Addition Successful!");
+        }
+    }
+
+    private class AddProjectListener implements ActionListener{
+
+        /**
+         * Triggered when user presses the add new project button. Extarcts data from
+         * saved JTextField and passes information to the database.
+         *
+         * @param e     Action which triggered method call
+         */
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(systemManCPProjectName.getText().equals(""))
+                JOptionPane.showMessageDialog(null, "Please enter a valid project name");
+            else{
+                String newProjectName = systemManCPProjectName.getText();
+                AddProject apObj = new AddProject(newProjectName);
+
+                boolean result = apObj.addProjectToDatabase();
+                if(result)
+                    JOptionPane.showMessageDialog(null, "Addition Successful");
+                else
+                    JOptionPane.showMessageDialog(null, "Error: Please try again!");
+            }
+        }
+    }
+
+    private class AssignTaskGenerateButtonListener implements ActionListener{
+
+        public void actionPerformed(ActionEvent e) {
+            AssignTask atObj = new AssignTask();
+            ArrayList<Employee> employeeList = atObj.employeeList();
+            ArrayList<EmployeeTask> taskList = atObj.buildTaskList(
+                    employeeList.get(0).getEmployeeNumber());
+
+            systemManAsTEmployeeSelector.removeAllItems();
+            for(Employee emp: employeeList)
+                systemManAsTEmployeeSelector.addItem(emp.getName());
+
+            systemManAsTTaskSelector.removeAllItems();
+            for(EmployeeTask task : taskList)
+                systemManAsTTaskSelector.addItem(task.getTaskName());
+        }
+    }
+
+    private class AssignTaskListener implements ActionListener{
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String employeeSelected = (String) systemManAsTEmployeeSelector.
+                    getSelectedItem();
+            String taskSelected = (String) systemManAsTTaskSelector.
+                    getSelectedItem();
+            AssignTask atObj = new AssignTask(employeeSelected, taskSelected);
+            boolean result = atObj.addAssignmentToDatabase();
+
+            if(result)
+                JOptionPane.showMessageDialog(null, "Addition Successful");
+            else
+                JOptionPane.showMessageDialog(null, "Error: Please try again!");
+        }
+    }
+
+    private class AssignTaskEmployeeListener implements ActionListener{
+        /**
+         * Extracts the employee selected and determines their ID. Using that information
+         * the listener then repopulates the task dropdown in order for it to only show
+         * tasks that the employee is not assigned to.
+         *
+         * @param e     Action which triggered method call
+         */
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String employeeName = (String) systemManAsTEmployeeSelector
+                    .getSelectedItem();
+
+            AssignTask atObj = new AssignTask();
+            ArrayList<EmployeeTask> tskList = atObj.dropDownTaskList(employeeName);
+
+            if(tskList.size() == 0)
+                JOptionPane.showMessageDialog(null,
+                        "Error: No Task to Assign. Selected another employee.");
+
+            for(EmployeeTask tsk: tskList)
+                systemManAsTTaskSelector.addItem(tsk.getTaskName());
         }
     }
 
@@ -636,6 +756,25 @@ public class GUI_Layout extends JFrame{
             CardLayout layout = (CardLayout) (cardStack.getLayout());
             layout.show(cardStack, "newUser");
             setSize(400, 350);
+        }
+    }
+
+    private class MatchProjectToTask implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String projectSelected;
+            JComboBox componentProxy;
+
+            if(e.getSource() == clockInDevProjectSelector) {
+                projectSelected = (String) clockInDevProjectSelector.getSelectedItem();
+                componentProxy = clockInDevTaskSelector;
+            }else{
+                projectSelected = (String) clockInManProjectSelector.getSelectedItem();
+                componentProxy = clockInManTaskSelector;
+            }
+
+            componentProxy.removeAllItems();
+            for(EmployeeTask task: PROJECT_TASK_MAPPING.getProjectTasks(projectSelected))
+                componentProxy.addItem(task.getTaskName());
         }
     }
 }

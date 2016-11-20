@@ -16,12 +16,12 @@ import java.text.SimpleDateFormat;
  * Created by Hugo Lucas on 11/9/2016.
  */
 
-public class AddEmployee implements ActionListener {
+public class AddEmployee {
 
-    private JTextField firstName; /* User input field for new Employee first name */
-    private JTextField lastName; /* User input field for new Employee last name */
-    private JTextField hireDate; /* User input field for new Employee hire date */
-    private JComboBox groupSelector; /* User input field for new Employee rank (Developer or Manager) */
+    private String firstName; /* User input field for new Employee first name */
+    private String lastName; /* User input field for new Employee last name */
+    private Date hireDate; /* User input field for new Employee hire date */
+    private int groupSelector; /* User input field for new Employee rank (Developer or Manager) */
 
 
     /**
@@ -34,10 +34,10 @@ public class AddEmployee implements ActionListener {
      * @param gs    JComboBox which allows the user to select the rank of the new employee
      *
      */
-    public AddEmployee(JTextField fn, JTextField ln, JTextField hd, JComboBox gs/*, JList ps*/){
+    public AddEmployee(String fn, String ln, String hd, int gs){
         this.firstName = fn;
         this.lastName = ln;
-        this.hireDate = hd;
+        this.hireDate = this.extractDate(hd);
         this.groupSelector = gs;
     }
 
@@ -45,37 +45,20 @@ public class AddEmployee implements ActionListener {
      * Triggered when user presses the add new employee button. Extracts user selections
      * from fields and passes information to database if the date entered is valid. No checks
      * are done on the other fields.
-     *
-     * @param e     Action which triggered method call
      */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        String firstNameEntered = this.getEntry(this.firstName);
-        String lastNameEntered = this.getEntry(this.lastName);
-        Date startDateEntered = this.extractDate();
-        int groupSelected = this.groupSelector.getSelectedIndex();
-
+    public int addEmployeeToDatabase() {
         DB_Writer writer = new DB_Writer();
-        if(startDateEntered != null)
-            writer.addEmployee(firstNameEntered, lastNameEntered, startDateEntered, groupSelected);
+
+        if(hireDate != null) {
+            boolean result = writer.addEmployee(firstName, lastName,
+                    hireDate, groupSelector);
+            if(result)
+                return 1;
+            else
+                return 0;
+        }
         else
-            JOptionPane.showMessageDialog(null, "Invalid date entry, please try again");
-    }
-
-    /**
-     * If the given JTextField has valid, non-blank data, this method extracts
-     * that information.
-     *
-     * @param name  JTextField parameter
-     * @return data captured from the text field
-     *
-     */
-    private String getEntry (JTextField name){
-        String toRet = null;
-        if(!name.getText().equals(""))
-            toRet = name.getText();
-
-        return toRet;
+            return -1;
     }
 
     /**
@@ -85,14 +68,13 @@ public class AddEmployee implements ActionListener {
      * @return Date objected to be passed to database writer
      *
      */
-    public Date extractDate(){
+    private Date extractDate(String dateString){
         Date toRet = null;
 
-        if(!this.hireDate.getText().equals("")){
-            String dateEntered = this.hireDate.getText();
+        if(!dateString.equals("")){
             DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
             try {
-                long selectedTimeInMillis = df.parse(dateEntered).getTime();
+                long selectedTimeInMillis = df.parse(dateString).getTime();
                 toRet = new Date(selectedTimeInMillis);
             } catch (ParseException e) {
                 return null;

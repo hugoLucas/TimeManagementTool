@@ -136,7 +136,7 @@ public class DB_Writer {
      * @param hireDate          hire date of the new employee
      * @param managerStatus     rank of the new employee
      */
-    public void addEmployee(String firstName, String lastName, Date hireDate, int managerStatus){
+    public boolean addEmployee(String firstName, String lastName, Date hireDate, int managerStatus){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
@@ -157,12 +157,16 @@ public class DB_Writer {
 
             insertStatement.executeUpdate();
             insertStatement.close();
+
+            return true;
         } catch (ClassNotFoundException e) {
             /* JAR may not be configured right or JDBC may not be working */
             e.printStackTrace();
+            return false;
         } catch (SQLException e) {
             /* Catch all for errors I have not yet encountered */
             e.printStackTrace();
+            return false;
         } finally{
             if (writer_connection != null)
                 try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
@@ -176,7 +180,7 @@ public class DB_Writer {
      * @param projectSelected       the project that task will be bound to
      * @param hourEstimate          the estimated man hours needed to complete task
      */
-    public void addTask(String newTaskName, String projectSelected, int hourEstimate){
+    public boolean addTask(String newTaskName, String projectSelected, int hourEstimate){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
@@ -202,12 +206,16 @@ public class DB_Writer {
 
             insertStatement.executeUpdate();
 
+            return true;
+
         } catch (ClassNotFoundException e) {
             /* JAR may not be configured right or JDBC may not be working */
             e.printStackTrace();
+            return false;
         } catch (SQLException e) {
             /* Catch all for errors I have not yet encountered */
             e.printStackTrace();
+            return false;
         } finally{
             if (writer_connection != null)
                 try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
@@ -219,7 +227,7 @@ public class DB_Writer {
      *
      * @param projectName   the name of the new project to add
      */
-    public void addProject(String projectName){
+    public boolean addProject(String projectName){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
@@ -233,13 +241,15 @@ public class DB_Writer {
 
             /* Execute statement */
             insertStatement.executeUpdate();
-
+            return true;
         } catch (ClassNotFoundException e) {
             /* JAR may not be configured right or JDBC may not be working */
             e.printStackTrace();
+            return false;
         } catch (SQLException e) {
             /* Catch all for errors I have not yet encountered */
             e.printStackTrace();
+            return false;
         } finally{
             if (writer_connection != null)
                 try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
@@ -305,41 +315,6 @@ public class DB_Writer {
     }
 
     /**
-     * Binds a task with a given identification number to a project.
-     *
-     * @param taskID        task identification number of the task to bind
-     * @param projectID     project identification number of the project task will be bound to
-     */
-    public void assignTask(int taskID, int projectID){
-        try {
-            /* Boiler plate to create class and establish connection */
-            Class.forName("com.mysql.jdbc.Driver");
-            this.writer_connection = DriverManager.getConnection(url, db_username, db_password);
-            /* Boiler plate to create class and establish connection */
-
-            /* Prepare query to database */
-            String updateQuery = "INSERT INTO project_task_map (TaskID, ProjectID) VALUES (?, ?)";
-            PreparedStatement updateStatement = writer_connection.prepareStatement(updateQuery);
-            updateStatement.setInt(1, taskID);
-            updateStatement.setInt(2, projectID);
-
-            /* Execute statement */
-            updateStatement.executeUpdate();
-
-        } catch (ClassNotFoundException e) {
-            /* JAR may not be configured right or JDBC may not be working */
-            e.printStackTrace();
-        } catch (SQLException e) {
-            /* Catch all for errors I have not yet encountered */
-            e.printStackTrace();
-        } finally{
-            if (writer_connection != null)
-                try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
-        }
-
-    }
-
-    /**
      * Changes the work status of an employee in order to track whether that employee is currently
      * clocked in or out.
      *
@@ -381,7 +356,7 @@ public class DB_Writer {
      * @param taskID        task identification number of the task to assign
      * @param employeeID    employee identification number of the employee task will be assigned to
      */
-    public void assignTaskToEmployee(int taskID, int employeeID){
+    public boolean assignTaskToEmployee(int taskID, int employeeID){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
@@ -395,13 +370,16 @@ public class DB_Writer {
             insertStmt.setInt(2, taskID);
 
             insertStmt.execute();
+            return true;
 
         } catch (ClassNotFoundException e) {
             /* JAR may not be configured right or JDBC may not be working */
             e.printStackTrace();
+            return false;
         } catch (SQLException e) {
             /* Catch all for errors I have not yet encountered */
             e.printStackTrace();
+            return false;
         } finally{
             if (writer_connection != null)
                 try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}

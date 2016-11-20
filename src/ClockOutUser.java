@@ -5,7 +5,7 @@
  * The userClockOut object allows users to store data representing when a
  * developer has officially clocked out to pause or finish working on a project.
  */
-public class userClockOut {
+public class ClockOutUser {
     //Variable of type Int respresenting the ID of the employee working on the task.
     private int employeeID;
     //Variable of type Int representing the ID of the task.
@@ -19,7 +19,7 @@ public class userClockOut {
      * @param eID
      * @param tID
      */
-    public userClockOut(int eID, int tID){
+    public ClockOutUser(int eID, int tID){
         this.employeeID = eID;
         this.taskID = tID;
     }

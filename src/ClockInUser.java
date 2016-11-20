@@ -7,7 +7,7 @@
  * developer has officially clocked in to start working on a project.
  *
  */
-public class userClockIn
+public class ClockInUser
 {
     //Variable of type Int respresenting the ID of the employee working on the task.
     private int employeeID;
@@ -22,7 +22,7 @@ public class userClockIn
      * @param eID
      * @param tID
      */
-    public userClockIn(int eID, int tID) {
+    public ClockInUser(int eID, int tID) {
         this.employeeID = eID;
         this.taskID = tID;
     }

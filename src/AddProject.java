@@ -1,38 +1,29 @@
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 /**
- * Created by Hugo on 11/10/2016.
+ * This class is responsible for the addition of a new project to the central
+ * database. This class takes in a reference to the GUI component used to enter
+ * the new project's name and extracts that information when the user presses
+ * the Create Project button. This information is then passed to a database
+ * writing object which makes the addition to the database.
+ *
+ * Created by Hugo Lucas on 11/10/2016.
  */
-public class AddProject implements ActionListener {
+public class AddProject {
 
-    private JTextField projectNameField; /* User input field for new project name */
+    private String projectName; /* User input field for new project name */
 
     /**
      * Saves reference to component user will enter the new project name.
-     *
-     * @param projNameField     JTextField needed to enter new project name
      */
-    public AddProject(JTextField projNameField){
-        this.projectNameField = projNameField;
+    public AddProject(String projName){
+        this.projectName = projName;
     }
 
     /**
      * Triggered when user presses the add new project button. Extarcts data from
      * saved JTextField and passes information to the database.
-     *
-     * @param e     Action which triggered method call
      */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if(projectNameField.getText().equals(""))
-            JOptionPane.showMessageDialog(null, "Please enter a valid project name");
-        else{
-            String newProjectName = projectNameField.getText();
-
-            DB_Writer writer = new DB_Writer();
-            writer.addProject(newProjectName);
-        }
+    public boolean addProjectToDatabase ( ) {
+        DB_Writer writer = new DB_Writer();
+        return writer.addProject(this.projectName);
     }
 }

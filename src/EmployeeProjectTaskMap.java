@@ -57,15 +57,6 @@ public class EmployeeProjectTaskMap {
     }
 
     /**
-     * Returns task list
-     *
-     * @return      ArrayList of EmployeeTask objects
-     */
-    public ArrayList<EmployeeTask> getTasks(){
-        return this.tasks;
-    }
-
-    /**
      * Given a project name, method compiles all tasks associated with that
      * project
      *
