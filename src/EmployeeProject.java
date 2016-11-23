@@ -1,8 +1,8 @@
 /**
+ * This objects holds data (name and ID) to represent a project that a developer is
+ * working on.
+ *
  * Created by Hugo Lucas on 10/29/2016.
- */
-/**
- * This objects holds data (name and ID) to represent a project that a developer is working on.
  */
 public class EmployeeProject
 {

@@ -1,6 +1,12 @@
+
 import java.util.ArrayList;
 
 /**
+ * This object is a representation of one of the tables located in the database.
+ * The goal of this class is provide a simple way of determining what tasks belong
+ * to what project and what identification number is associated with a given project
+ * name or task name.
+ *
  * Created by Hugo Lucas on 11/3/2016.
  */
 public class EmployeeProjectTaskMap {
@@ -44,7 +50,6 @@ public class EmployeeProjectTaskMap {
             taskIndexToProject.add(projects.size() - 1);
         }else
             taskIndexToProject.add(projectIndex);
-
     }
 
     /**
@@ -130,5 +135,9 @@ public class EmployeeProjectTaskMap {
             if(p.getProjectID() == pjID)
                 return p.getProjectName();
         return null;
+    }
+
+    public ArrayList<Integer> getTaskIndexToProject(){
+        return this.taskIndexToProject;
     }
 }
