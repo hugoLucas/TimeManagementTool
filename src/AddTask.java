@@ -1,23 +1,23 @@
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-
 /**
+ * This class handles the transport of information from the GUI layer to the
+ * database. Saves references to the data values supplied to the user and passes
+ * them to the database writing object when all values are valid and the user
+ * selects the "Add Task" button.
+ *
  * Created by Hugo on 11/10/2016.
  */
 public class AddTask {
 
-    private String projectSelector; /* User input field for specifying new task project assignment */
-    private int estHoursInput; /* User input field to enter new task estimated man hours needed for completion */
-    private String taskNameInput; /* User input field to enter new task name */
+    private String projectSelector; /* User input specifying new task project assignment */
+    private int estHoursInput; /* User input for new task's estimated man hours needed for completion */
+    private String taskNameInput; /* User input value for new task's name */
 
     /**
-     * Saves references to user input components and populates the project dropdown menu.
+     * Saves references to the text/selection in the user input components.
      *
-     * @param projectSelector   component user will select project assignment with
-     * @param taskNameInput     component user will specify new task name with
-     * @param hoursInput        component user will specify estimated man hours needed to complete task with
+     * @param projectSelector   project assignment
+     * @param taskNameInput     new task name
+     * @param hoursInput        estimated man hours needed to complete task
      */
     public AddTask(String projectSelector, String taskNameInput, int hoursInput){
         this.projectSelector = projectSelector;
@@ -26,13 +26,20 @@ public class AddTask {
     }
 
     /**
-     * Triggerd when user presses create new task button. Extracts data from all GUI components
-     * and passes information to database if the estimated time needed to complete the task is a
-     * valid number. Does not validate any other field.
+     * Invoked when user presses create new task button. Passes information to database
+     * if the estimated time needed to complete the task is a valid number and
+     * the other fields are non-empty.
      *
+     * @return  TRUE if task was added to database
+     *          FALSE if otherwise
      */
     public boolean addTaskToDatabase() {
-        DB_Writer writer = new DB_Writer();
-        return writer.addTask(taskNameInput, projectSelector, estHoursInput);
+        if(this.estHoursInput > 0 && !this.projectSelector.equals("")
+                && !this.taskNameInput.equals("")) {
+            DB_Writer writer = new DB_Writer();
+            return writer.addTask(taskNameInput, projectSelector, estHoursInput);
+        }
+
+        return false;
     }
 }

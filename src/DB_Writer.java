@@ -17,7 +17,7 @@ public class DB_Writer {
         this.db_username = "root";
         this.db_password = "mysql";
         //this.url = "jdbc:mysql://google/time_management_system?cloudSqlInstance=tmtproject-148101:us-central1:timemanagementsystem&socketFactory=com.google.cloud.sql.mysql.SocketFactory";
-        this.url = "jdbc:mysql://localhost:3306/time_management_system";
+        //this.url = "jdbc:mysql://localhost:3306/time_management_system";
     }
 
     /**
@@ -26,7 +26,7 @@ public class DB_Writer {
      * @param employeeNumber    employee identification number of the employee that is clocking in
      * @param taskID            the task identification number of the task the employee is going to work on
      */
-    public void clockInUser(int employeeNumber, int taskID){
+    public boolean clockInUser(int employeeNumber, int taskID){
         long currentMilliTime = System.currentTimeMillis();
         Time clockInTime = new Time(currentMilliTime);
         Date clockInDate = new Date(currentMilliTime);
@@ -47,13 +47,15 @@ public class DB_Writer {
 
             /* Execute statement */
             insertStatement.executeUpdate();
-
+            return true;
         } catch (ClassNotFoundException e) {
             /* JAR may not be configured right or JDBC may not be working */
             e.printStackTrace();
+            return false;
         } catch (SQLException e) {
             /* Catch all for errors I have not yet encountered */
             e.printStackTrace();
+            return false;
         } finally{
             if (writer_connection != null)
                 try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
@@ -321,7 +323,7 @@ public class DB_Writer {
      * @param employeeNumber        employee identification number of the employee who's status will change
      * @param newStatus             final value of work status
      */
-    public void setWorkStatus(int employeeNumber, int newStatus){
+    public boolean setWorkStatus(int employeeNumber, int newStatus){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
@@ -336,13 +338,10 @@ public class DB_Writer {
 
             /* Execute statement */
             updateStatement.executeUpdate();
-
-        } catch (ClassNotFoundException e) {
-            /* JAR may not be configured right or JDBC may not be working */
+            return true;
+        } catch (Exception e){
             e.printStackTrace();
-        } catch (SQLException e) {
-            /* Catch all for errors I have not yet encountered */
-            e.printStackTrace();
+            return false;
         } finally{
             if (writer_connection != null)
                 try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}

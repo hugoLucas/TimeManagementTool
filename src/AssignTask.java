@@ -1,48 +1,65 @@
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 /**
+ * This class handles the process of assigning an employee a task to work on by
+ * adding the assignment information to the database. This class is invoked when
+ * the user selects the "Assign Task Button".
+ *
  * Created by Hugo on 11/14/2016.
  */
 public class AssignTask {
 
-    private String employeeSelected; /* User input field for specifying employee to assign task to */
-    private String taskSelected; /* User input field for selecting task to assign */
+    private String employeeSelected; /* Employee to assign task to */
+    private String taskSelected; /* Task to assign */
 
     /**
-     * Default constructor. Takes in references to GUI components user will input task assignment
-     * data into. Attaches listener to button passed that extracts data from the components and passes
-     * the information to the database. Attaches listener to employee selector in order to generate unique
-     * task list for the employee.
+     * Takes in references to text in GUI components and
+     * saves them for future use.
      *
-     * @param empSel        dropdown menu used to select employee to assign task to
-     * @param tskSel        dropdown menu used to select task to assign
+     * @param empSel        employee to assign task to
+     * @param tskSel        task to assign
      */
     public AssignTask(String empSel, String tskSel){
         this.employeeSelected = empSel;
         this.taskSelected = tskSel;
     }
 
+    /**
+     * Constructor used by GUI to access methods needed to populate screen which
+     * invokes this class.
+     */
     public AssignTask(){};
 
     /**
-     * Class listener that reacts to the pressing of the generate button. Creates and stores a list of employees
-     * and possible tasks for the first employee. Populates the employee dropdown with the list of employees
-     * and also populates the task dropdown with tasks the first employee in the list is not assigned to.
+     * Provides a list of all employees in the database.
      *
+     * @return      an ArrayList of Employee objects containing information
+     *              about every employee in database
      */
     public ArrayList<Employee> employeeList() {
         DB_Reader reader = new DB_Reader();
         return reader.allEmployees();
     }
 
+    /**
+     * Provides a list of all tasks an employee is currently not assigned to.
+     *
+     * @param employeeID    the employee ID used to select tasks with
+     * @return              an ArrayList of Task objects containing information
+     *                      about every task in database employee is not assigned to
+     */
     public ArrayList<EmployeeTask> buildTaskList(int employeeID){
         DB_Reader reader = new DB_Reader();
         return reader.unassignedTask(employeeID);
     }
 
+    /**
+     * Provides the information needed to populate the task menu in the Assign Task
+     * tab of the System menu.
+     *
+     * @param name      name of the employee who is currently selected
+     * @return          a list of tasks not assigned to that employee
+     */
     public ArrayList<EmployeeTask> dropDownTaskList(String name){
         DB_Reader reader = new DB_Reader();
         ArrayList<Employee> empList = this.employeeList();
@@ -57,7 +74,7 @@ public class AssignTask {
      * @param name      employee name extracted from selector
      * @return          the employee identification number for the given employee
      */
-    private int getEmployeeID(String name, ArrayList<Employee> empList){
+    public int getEmployeeID(String name, ArrayList<Employee> empList){
         for(Employee e: empList)
             if(e.getName().equals(name))
                 return e.getEmployeeNumber();
@@ -70,7 +87,7 @@ public class AssignTask {
      * @param name      task name extracted from selector
      * @return          the task identification number for the given task
      */
-    private int getTaskID(String name, ArrayList<EmployeeTask> tskList){
+    public int getTaskID(String name, ArrayList<EmployeeTask> tskList){
         for(EmployeeTask t: tskList)
             if(t.getTaskName().equals(name))
                 return t.getTaskID();
@@ -78,18 +95,28 @@ public class AssignTask {
     }
 
     /**
-     * Triggered by pressing assign task button. Extracts information from components and
-     * validates the taskID and employeeID. Once that's done it passes that information to
-     * the database writer to alter the assignment tables.
+     * Triggered by pressing assign task button, validates the taskID and employeeID.
+     * Then passes info to the database writer to alter the assignment tables.
+     *
+     * @return      TRUE if assignment was added
+     *              FALSE otherwise
      */
     public boolean addAssignmentToDatabase() {
         DB_Writer writer = new DB_Writer();
         ArrayList<Employee> empList = this.employeeList();
-        int eID = getEmployeeID(employeeSelected, empList);
+        if (empList != null) {
+            int eID = getEmployeeID(employeeSelected, empList);
 
-        ArrayList<EmployeeTask> tskList = this.buildTaskList(eID);
-        int tID = getTaskID(taskSelected, tskList);
+            ArrayList<EmployeeTask> tskList = this.buildTaskList(eID);
+            if (tskList != null) {
+                int tID = getTaskID(taskSelected, tskList);
 
-        return writer.assignTaskToEmployee(tID, eID);
+                if(eID < 0 || tID < 0)
+                    return false;
+                return writer.assignTaskToEmployee(tID, eID);
+            }
+        }
+
+        return false;
     }
 }

@@ -420,13 +420,17 @@ public class GUI_Layout extends JFrame{
             }
 
             ClockInUser clockInUser = new ClockInUser(EMPLOYEE_ID, PROJECT_TASK_MAPPING.getTaskID(taskSelected));
-            clockInUser.clockIn();
-            destroyClock();
+            boolean result = clockInUser.clockIn();
+            if(result) {
+                destroyClock();
 
-            prepClockOutScreen(projectSelected, taskSelected);
-            setClock(clockLabel);
-            layout.show(cardStack, panelName);
-            clockedInOrOut = panelName;
+                prepClockOutScreen(projectSelected, taskSelected);
+                setClock(clockLabel);
+                layout.show(cardStack, panelName);
+                clockedInOrOut = panelName;
+            }else
+                JOptionPane.showMessageDialog(null, "Connectivity Error, please " +
+                        "try again!");
         }
     }
 
@@ -740,6 +744,7 @@ public class GUI_Layout extends JFrame{
                 JOptionPane.showMessageDialog(null,
                         "Error: No Task to Assign. Selected another employee.");
 
+            systemManAsTTaskSelector.removeAllItems();
             for(EmployeeTask tsk: tskList)
                 systemManAsTTaskSelector.addItem(tsk.getTaskName());
         }

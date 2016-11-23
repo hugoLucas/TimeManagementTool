@@ -9,21 +9,26 @@
  */
 public class AddProject {
 
-    private String projectName; /* User input field for new project name */
+    private String projectName; /* User input for new project name */
 
     /**
-     * Saves reference to component user will enter the new project name.
+     * Saves reference to new project name.
      */
     public AddProject(String projName){
         this.projectName = projName;
     }
 
     /**
-     * Triggered when user presses the add new project button. Extarcts data from
-     * saved JTextField and passes information to the database.
+     * Triggered when user presses the add new project button. Passes information
+     * over to database to handle the addition of the new project.
+     *
+     * @return TRUE when project was added successfully, FALSE otherwise.
      */
     public boolean addProjectToDatabase ( ) {
-        DB_Writer writer = new DB_Writer();
-        return writer.addProject(this.projectName);
+        if(this.projectName != null) {
+            DB_Writer writer = new DB_Writer();
+            return writer.addProject(this.projectName);
+        }
+        return false;
     }
 }
