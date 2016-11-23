@@ -2,6 +2,10 @@ import java.sql.Date;
 import java.sql.Time;
 
 /**
+ * This class is an object representation of a time log in the database. It contains
+ * all the current information for a specific time log. ClockOut variable is null when
+ * the employee is still currently working on the task.
+ *
  * Created by Hugo Lucas on 10/29/2016.
  */
 public class EmployeeLog {
@@ -48,28 +52,6 @@ public class EmployeeLog {
     }
 
     /**
-     * Displays the time of clock in and clock out, the date, the task that was
-     * worked on, and, if available, the ID number of the employee that worked
-     * on the task.
-     * @return the string to be printed out
-     */
-    public String printLog(){
-        String out = null;
-        String clockProxy = null;
-
-        if(clockOut != null)
-            clockProxy = clockOut.toString();
-        else
-            clockProxy = "PENDING";
-
-        if(employeeID == -1)
-            out = String.format("IN: %s OUT: %s DATE: %s TASK: %d",clockIn.toString(), clockProxy, logDate.toString(), taskID);
-        else
-            out = String.format("IN: %s OUT: %s DATE: %s TASK: %d EmployeeID: %d",clockIn.toString(), clockProxy, logDate.toString(), taskID, employeeID);
-        return out;
-    }
-
-    /**
      * Simple getter method
      *
      * @return      Time object representing the start of the employee log
@@ -99,7 +81,7 @@ public class EmployeeLog {
     /**
      * Simple getter method
      *
-     * @return      Time object representing the task associated with the employee log
+     * @return      Task ID of task employee worked on
      */
     public int getTaskID(){
         return this.taskID;
@@ -108,7 +90,7 @@ public class EmployeeLog {
     /**
      * Simple getter method
      *
-     * @return      Time object representing the employee associated with the employee log
+     * @return     Employee ID of employee
      */
     public int getEmployeeID(){
         return this.employeeID;
