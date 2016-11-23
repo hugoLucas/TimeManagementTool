@@ -17,7 +17,7 @@ public class DB_Writer {
         this.db_username = "root";
         this.db_password = "mysql";
         //this.url = "jdbc:mysql://google/time_management_system?cloudSqlInstance=tmtproject-148101:us-central1:timemanagementsystem&socketFactory=com.google.cloud.sql.mysql.SocketFactory";
-        //this.url = "jdbc:mysql://localhost:3306/time_management_system";
+        this.url = "jdbc:mysql://localhost:3306/time_management_system";
     }
 
     /**
