@@ -70,7 +70,7 @@ public class DB_Writer {
      * @param employeeNumber    employee identification number
      * @param taskID            task identification number
      */
-    public void clockOutUser(int employeeNumber, int taskID) {
+    public boolean clockOutUser(int employeeNumber, int taskID) {
         Time clockOutTime = new Time(System.currentTimeMillis());
         try {
             /* Boiler plate to create class and establish connection */
@@ -80,8 +80,10 @@ public class DB_Writer {
 
             String differenceQuery = "SELECT TimeIn, Date FROM time_logs WHERE EmployeeID = ? AND TaskID = ? AND TimeOut IS NULL";
             PreparedStatement difStatement = writer_connection.prepareStatement(differenceQuery);
-            difStatement.setInt(1, employeeNumber);
-            difStatement.setInt(2, taskID);
+
+            int index = 1;
+            difStatement.setInt(index ++, employeeNumber);
+            difStatement.setInt(index ++, taskID);
 
             /* Execute statement */
             ResultSet difTime = difStatement.executeQuery();
@@ -116,14 +118,10 @@ public class DB_Writer {
             updateStatement.executeUpdate();
             updateStatement.close();
 
-
-
-        } catch (ClassNotFoundException e) {
-            /* JAR may not be configured right or JDBC may not be working */
+            return true;
+        } catch (Exception e){
             e.printStackTrace();
-        } catch (SQLException e) {
-            /* Catch all for errors I have not yet encountered */
-            e.printStackTrace();
+            return false;
         } finally{
             if (writer_connection != null)
                 try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}
@@ -267,9 +265,9 @@ public class DB_Writer {
      * @param dateHired     the date the employee was hired
      * @param userName      the desired username
      * @param passWord      the desired password
-     * @return              1 if login crednentials are created, -1 if employee already has login credentials
+     * @return              TRUE if login crednentials are created, FALSE if employee already has login credentials
      */
-    public int createLogin(String firstName, String lastName, Date dateHired, String userName, String passWord){
+    public boolean createLogin(String firstName, String lastName, Date dateHired, String userName, String passWord){
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
@@ -298,18 +296,14 @@ public class DB_Writer {
                 insertStatement.executeUpdate();
                 insertStatement.close();
 
-                return 1;
+                return true;
             }else
-                return -1;
+                return false;
 
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             /* JAR may not be configured right or JDBC may not be working */
             e.printStackTrace();
-            return -2;
-        } catch (SQLException e) {
-            /* Catch all for errors I have not yet encountered */
-            e.printStackTrace();
-            return -2;
+            return false;
         } finally{
             if (writer_connection != null)
                 try { writer_connection.close(); }catch (Exception e){ /* Ignore this I guess! */}

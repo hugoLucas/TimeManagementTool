@@ -130,8 +130,7 @@ public class GUI_Layout extends JFrame{
 
         loginNewEmployeeButton.addActionListener(new LoginNewUser());
 
-        newUserCreateLoginButton.addActionListener(new CreateNewUser(newUserFirstName, newUserLastName,
-                newUserDateHired, newUserUsernameField, newUserPasswordField));
+        newUserCreateLoginButton.addActionListener(new NewUserLogin());
 
         ClockInButtonListener clockin_listener = new ClockInButtonListener();
         clockInDevClockInButton.addActionListener(clockin_listener);
@@ -458,12 +457,16 @@ public class GUI_Layout extends JFrame{
             }
 
             ClockOutUser clockOutUser = new ClockOutUser(EMPLOYEE_ID, PROJECT_TASK_MAPPING.getTaskID(taskSelected));
-            clockOutUser.clockOut();
+            boolean result = clockOutUser.clockOut();
 
-            destroyClock();
-            setClockInDropdowns();
-            layout.show(cardStack, screeName);
-            clockedInOrOut = screeName;
+            if (result) {
+                destroyClock();
+                setClockInDropdowns();
+                layout.show(cardStack, screeName);
+                clockedInOrOut = screeName;
+            } else
+                JOptionPane.showMessageDialog(null, "Connectivity Error, please " +
+                        "try again!");
         }
     }
 
@@ -780,6 +783,28 @@ public class GUI_Layout extends JFrame{
             componentProxy.removeAllItems();
             for(EmployeeTask task: PROJECT_TASK_MAPPING.getProjectTasks(projectSelected))
                 componentProxy.addItem(task.getTaskName());
+        }
+    }
+
+    private class NewUserLogin implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String firstName = newUserFirstName.getText();
+            String lastName = newUserLastName.getText();
+            String dateHired = newUserDateHired.getText();
+            String userName = newUserUsernameField.getText();
+            String password = String.valueOf(newUserPasswordField.getPassword());
+
+            if(firstName.equals("") || lastName.equals("") || dateHired.equals("")
+                    || userName.equals("") || password.equals(""))
+                JOptionPane.showMessageDialog(null, "Please enter all the required information");
+            else {
+                CreateNewUser cnuObj = new CreateNewUser(firstName, lastName,
+                        dateHired, userName, password);
+
+                boolean result = cnuObj.createNewLogin();
+                if(!result)
+                    JOptionPane.showMessageDialog(null, "Error: Please try again!");
+            }
         }
     }
 }

@@ -1,4 +1,8 @@
 /**
+ * This class is in retrieving information from the database. Although DB_Writer also
+ * retrieves information from the database, this class will handle the majority of reading
+ * of database information in the program.
+ *
  * Created by Hugo Lucas on 10/28/2016.
  */
 import java.sql.*;
@@ -388,52 +392,10 @@ public class DB_Reader {
     }
 
     /**
-     * Generates a list of all Tasks that are not assigned to a specific project.
-     * Used to bing tasks to project by Manager level employee.
-     *
-     * @return  list of all orphaned tasks
-     */
-    public ArrayList<EmployeeTask> orphanTasks(){
-        ArrayList<EmployeeTask> taskList = new ArrayList<>();
-        try {
-            /* Boiler plate to create class and establish connection */
-            Class.forName("com.mysql.jdbc.Driver");
-            this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
-            /* Boiler plate to create class and establish connection */
-
-            /* Prepares query to get task in row with null timeout*/
-            String query = "Select tasks.TaskID, tasks.TaskName FROM tasks WHERE taskID NOT IN(SELECT project_task_map.TaskID " +
-                    "FROM project_task_map)";
-
-            PreparedStatement stmt = reader_connection.prepareStatement(query);
-            ResultSet res = stmt.executeQuery();
-
-            while(res.next())
-                taskList.add(new EmployeeTask(res.getString("TaskName"), res.getInt("TaskID")));
-
-            if(taskList.size() > 0)
-                return taskList;
-            else
-                return null;
-
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (reader_connection != null)
-                try {
-                    reader_connection.close();
-                } catch (Exception e) { /* Ignore this I guess! */}
-        }
-    }
-
-    /**
      * Looks through database and determines how many hours a project's tasks have been worked. Query compares this to the
      * estimated amount of work-hours needed to complete the project.
      *
+     * @return      a project line object representing the time worked on a specific project
      */
     public ArrayList<ProjectLine> genProgressReport(){
         ArrayList<ProjectLine> rep = new ArrayList<>();

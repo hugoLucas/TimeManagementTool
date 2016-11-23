@@ -1,23 +1,23 @@
 /**
+ * This class handles the clock-out function of the time management system. This class
+ * provides the information needed for the system to mark a user as clocked-out and no
+ * longer working on a task. This class is invoked when the user presses the "Clock-Out"
+ * button from the Manager or Developer Clock-Out screen.
+ *
  * Created by Hugo Lucas on 11/4/2016.
  */
-/**
- * The userClockOut object allows users to store data representing when a
- * developer has officially clocked out to pause or finish working on a project.
- */
+
 public class ClockOutUser {
-    //Variable of type Int respresenting the ID of the employee working on the task.
-    private int employeeID;
-    //Variable of type Int representing the ID of the task.
-    private int taskID;
+
+    private int employeeID;     /* Employee ID of the user clocking out */
+    private int taskID;         /* The task ID of the task the user was working on */
 
     /**
-     * userClockOut contrsuctor reads in two integer variables (one representing the
-     * employee's ID and the other the task's ID) and stores both of these for
-     * later use.
+     * Constructor reads in the identification numbers needed by system to clock
+     * a user out.
      *
-     * @param eID
-     * @param tID
+     * @param eID   employee ID of the user that needs to clock-out
+     * @param tID   task ID of the task the user was working on
      */
     public ClockOutUser(int eID, int tID){
         this.employeeID = eID;
@@ -25,13 +25,21 @@ public class ClockOutUser {
     }
 
     /**
-     * The clockOut method initializes an instance of the object DB_Writer to
-     * access the database. It then stores employeeID and taskID and clocks out
-     * the user. It also changes the the status of the employee.
+     * Method creates a database writing object to alter database to reflect
+     * user is no longer working on project. Verifies the IDs supplied by the
+     * GUI are valid (non-negative) and then passes the information to the
+     * database writing object. If any part of the clock-out process fails the
+     * method returns false.
+     *
+     * @return      TRUE if clock-out is successful
+     *              FALSE otherwise
      */
-    public void clockOut(){
-        DB_Writer writer = new DB_Writer();
-        writer.clockOutUser(employeeID, taskID);
-        writer.setWorkStatus(employeeID, 0);
+    public boolean clockOut(){
+        if(this.employeeID > 0 && this.taskID > 0) {
+            DB_Writer writer = new DB_Writer();
+            if (writer.clockOutUser(employeeID, taskID))
+                return writer.setWorkStatus(employeeID, 1);
+        }
+        return false;
     }
 }

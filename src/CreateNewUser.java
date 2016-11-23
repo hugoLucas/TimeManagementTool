@@ -1,6 +1,3 @@
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -9,77 +6,78 @@ import java.text.SimpleDateFormat;
 /**
  * Created by Hugo on 11/10/2016.
  */
-public class CreateNewUser implements ActionListener {
+public class CreateNewUser {
 
-    private JTextField firstNameField;          /* JTextField used by user to enter the new user's first name */
-    private JTextField lastNameField;           /* JTextField used by user to enter the new user's last name */
-    private JTextField dateHiredField;          /* JTextField used by user to enter the new user's hire date */
-    private JTextField userNameField;           /* JTextField used by user to specify their login username */
-    private JPasswordField passWordField;       /* JPasswordField used by user to specifiy their login password */
+    private String firstName;          /* New user's first name */
+    private String lastName;           /* New user's last name */
+    private String dateHired;          /* New user's hire date */
+    private String userName;           /* Login username */
+    private String passWord;           /* Login password */
 
     /**
-     * Stores references to GUI components used by user to specify their identifying information and their
+     * Stores references to text from GUI components used by user to specify their identifying information and their
      * desired login credentials
      *
-     * @param firstName     Reference to GUI component used to specify the user's first name
-     * @param lastName      Reference to GUI component used to specify the user's last name
-     * @param dateHired     Reference to GUI component used to specify the user's date of hire
-     * @param username      Reference to GUI component used to specify the user's desired username
-     * @param password      Reference to GUI component used to specify the user's desired password
+     * @param firstName     first name
+     * @param lastName      last name
+     * @param dateHired     date of hire
+     * @param username      desired username
+     * @param password      desired password
      */
-    public CreateNewUser(JTextField firstName, JTextField lastName, JTextField dateHired, JTextField username, JPasswordField password ){
-        this.firstNameField = firstName;
-        this.lastNameField = lastName;
-        this.dateHiredField = dateHired;
-        this.userNameField = username;
-        this.passWordField = password;
+    public CreateNewUser(String firstName, String lastName, String dateHired, String username, String password ){
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dateHired = dateHired;
+        this.userName = username;
+        this.passWord = password;
     }
 
     /**
-     * Action listener triggered by the create login button. Extracts information from user input fields and passes
-     * that information to a database writer object if non of the user input fields are empty. If the database writer
-     * determines the user already exists or if the new user was created, method generates an appropriate pop-up
-     * message to alert the user of the result.
-     *
-     * @param e     Action which triggered the method call
+     * Passes information to a database writer object if non of the user input fields are empty.
+     * If the database writer determines the user already exists or if the new user was created,
+     * method generates an appropriate pop-up message to alert the user of the result.
      */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        String firstName = this.firstNameField.getText();
-        String lastName = this.lastNameField.getText();
-        Date dateHired = extractDate();
-        String userName = this.userNameField.getText();
-        String password = String.valueOf(this.passWordField.getPassword());
-
-        if(firstName.equals("") || lastName.equals("") || dateHired == null || userName.equals("") || password.equals(""))
-            JOptionPane.showMessageDialog(null, "Please enter all the required information");
-        else{
+    public boolean createNewLogin () {
+        Date dateOfHire = this.extractDate(dateHired);
+        if (dateOfHire != null) {
             DB_Writer writer = new DB_Writer();
-            int res = writer.createLogin(firstName, lastName, dateHired, userName, password);
+            boolean result = writer.createLogin(firstName, lastName, dateOfHire, userName,
+                    passWord);
 
-            if(res > 0)
-                JOptionPane.showMessageDialog(null, "Login created! Login using the main screen to continue");
-            else
-                JOptionPane.showMessageDialog(null, "User already exists! Please login using the main screen");
+            return result;
         }
+
+        return false;
     }
 
     /**
-     * Given a date String of the format Month-Day-Year, this method turns that String into a java.sql.Date object
-     * in order to pass that information to the database writer. If the transformation fails the method returns null
+     * If the hireDate isn't blank method parses the String date representation
+     * into a valid java.sql.Date object. Verifies this object is a valid date
+     * by comparing the new object's String representation to the old String
+     * value. This is done to avoid errors when user supplies an invalid date
+     * that is still parseable.
      *
-     * @return java.sql.Date object if String is valid, null if not.
+     * @return  Date objected to be passed to database writer if valid, null
+     *          otherwise.
      */
-    public Date extractDate(){
+    private Date extractDate(String dateString){
         Date toRet = null;
 
-        if(!this.dateHiredField.getText().equals("")){
-            String dateEntered = this.dateHiredField.getText();
-            DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-            try {
-                long selectedTimeInMillis = df.parse(dateEntered).getTime();
-                toRet = new Date(selectedTimeInMillis);
-            } catch (ParseException e) {
+        if (dateString != null) {
+            if(!dateString.equals("")){
+                DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+                try {
+                    long selectedTimeInMillis = df.parse(dateString).getTime();
+                    toRet = new Date(selectedTimeInMillis);
+                } catch (ParseException e) {
+                    return null;
+                }
+
+                String check = dateString.substring(6,10) + "-" + dateString.substring(0,2) +
+                        "-" + dateString.substring(3,5);
+
+                if(check.equals(toRet.toString()))
+                    return toRet;
                 return null;
             }
         }
