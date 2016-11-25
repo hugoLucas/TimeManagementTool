@@ -370,6 +370,7 @@ public class GUI_Layout extends JFrame{
                 String nextScreenName = loginHandler.determineNextScreenName(screenNameList);
 
                 layout.show(cardStack, nextScreenName);
+                clockedInOrOut = nextScreenName;
                 setClock(timeLabel);
 
                 if (authenticationResult[1] == 0) {

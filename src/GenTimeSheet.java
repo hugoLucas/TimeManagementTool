@@ -3,6 +3,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 /**
+ * Object is responsible for the creation of a time sheet report
+ * for a given user, be they manager or developer. This class takes
+ * in arguments that specify the type and scope of report and then
+ * passes the information to the appropriate database reader method.
+ * Lastly, this class passes the database information to the report
+ * generation class.
+ *
  * Created by Hugo Lucas on 11/5/2016.
  */
 public class GenTimeSheet {
@@ -109,5 +116,24 @@ public class GenTimeSheet {
 
         this.start = new Date(intervalStartTime);
         this.end = new Date(intervalEndTime);
+    }
+
+    /**
+     * This method is only used in verify the behavior of the object. This method
+     * is not called anywhere in the program. Use only in Testing.
+     *
+     * @return      An array list containing the current values of all private fields
+     */
+    public ArrayList<Object> returnAllFields(){
+        ArrayList<Object> objectList = new ArrayList<>(7);
+        objectList.add(timeIntervalSelected);
+        objectList.add(projectIDSeleted);
+        objectList.add(taskIDSelected);
+        objectList.add(employeeStatus);
+        objectList.add(employeeID);
+        objectList.add(start);
+        objectList.add(end);
+
+        return objectList;
     }
 }

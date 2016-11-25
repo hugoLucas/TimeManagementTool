@@ -7,13 +7,18 @@
  */
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class DB_Reader {
 
-    private Connection reader_connection;   /* Connection shared by all methods, use in smallest possible scope */
-    static private String db_username;      /* Username used to access database */
-    static private String db_password;      /* Password used to access database */
-    static private String url;              /* Url used to establish JDBC connection */
+    private Connection reader_connection;       /* Connection shared by all methods, use in smallest possible scope */
+    static private String db_username;          /* Username used to access database */
+    static private String db_password;          /* Password used to access database */
+    static private String url;                  /* Url used to establish JDBC connection */
+
+    /* VARIABLES SHOULD BE USED TO VALIDATE METHODS ONLY -- DO NOT USE IN ANYTHING BESIDES TEST CLASSES */
+    private ArrayList<String> sqlStatements;         /* String representation of the SQL code passed to the database */
 
     /**
      * Default constructor. Initializes fields to their default values. If testing is being done use the local
@@ -22,6 +27,7 @@ public class DB_Reader {
     public DB_Reader(){
         this.db_username = "root";
         this.db_password = "mysql";
+        this.sqlStatements = new ArrayList<>();
 
         /* Use this for release testing */
         //this.url = "jdbc:mysql://google/time_management_system?cloudSqlInstance=tmtproject-148101:us-central1:timemanagementsystem&socketFactory=com.google.cloud.sql.mysql.SocketFactory";
@@ -48,7 +54,8 @@ public class DB_Reader {
             /* Boiler plate to create class and establish connection */
 
             /* Prepare query to database */
-            PreparedStatement stmt = reader_connection.prepareStatement("SELECT employee.employeeID, employee.Manager, employee.WorkStatus, login.Password FROM employee, login WHERE login.Username = ?");
+            String sqlQuery = "SELECT employee.employeeID, employee.Manager, employee.WorkStatus, login.Password FROM employee, login WHERE login.Username = ?";
+            PreparedStatement stmt = reader_connection.prepareStatement(sqlQuery);
             stmt.setString(1, input_username);
 
             /* Execute statement */
@@ -64,15 +71,13 @@ public class DB_Reader {
                 }
             }
 
+            ArrayList<Object> parameterList = new ArrayList<>();
+            parameterList.add(input_username);
+            this.addStatement(sqlQuery, parameterList);
+
             return result;
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             /* JAR may not be configured right or JDBC may not be working */
-            e.printStackTrace();
-            result[0] = -2;
-            return result;
-        } catch (SQLException e) {
-            /* Catch all for errors I have not yet encountered */
-            e.printStackTrace();
             result[0] = -2;
             return result;
         } finally{
@@ -90,8 +95,8 @@ public class DB_Reader {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
-            String query = "SELECT EmployeeID, FirstName, LastName, EndDate FROM employee";
-            PreparedStatement stmt = reader_connection.prepareStatement(query);
+            String sqlQuery = "SELECT EmployeeID, FirstName, LastName, EndDate FROM employee";
+            PreparedStatement stmt = reader_connection.prepareStatement(sqlQuery);
             ResultSet queryResult = stmt.executeQuery();
 
             ArrayList<Employee> empList = new ArrayList<Employee>();
@@ -110,17 +115,11 @@ public class DB_Reader {
             queryResult.close();
 
             return empList;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             return null;
         } finally {
             if (reader_connection != null)
-                try {
-                    reader_connection.close();
-                } catch (Exception e) { /* Ignore this I guess! */}
+                try { reader_connection.close(); } catch (Exception e) { /* Ignore this I guess! */}
         }
     }
 
@@ -139,22 +138,28 @@ public class DB_Reader {
             /* Boiler plate to create class and establish connection */
 
             /* Prepares query for get all tasks for a given employee */
-            String query = "SELECT * FROM tasks WHERE tasks.TaskID IN (SELECT taskID" +
+            String sqlQueryOne = "SELECT * FROM tasks WHERE tasks.TaskID IN (SELECT taskID" +
                     " FROM employee_task_map WHERE EmployeeID = ?)";
-            PreparedStatement taskStatement = reader_connection.prepareStatement(query);
+            PreparedStatement taskStatement = reader_connection.prepareStatement(sqlQueryOne);
             taskStatement.setInt(1, employee_number);
             ResultSet taskQueryResult = taskStatement.executeQuery();
 
+            ArrayList<Object> parameterList = new ArrayList<>();
+            parameterList.add(employee_number);
+            this.addStatement(sqlQueryOne, parameterList);
             while(taskQueryResult.next()){
                 /* Create Task object from query results*/
                 int taskID = taskQueryResult.getInt("TaskID");
                 EmployeeTask tk = new EmployeeTask(taskQueryResult.getString("TaskName"), taskID);
 
-                query = "SELECT * FROM projects WHERE ProjectID = ( SELECT projectID FROM project_task_map WHERE TaskID = ?)";
-                PreparedStatement projectStatement = reader_connection.prepareStatement(query);
+                String sqlQueryTwo = "SELECT * FROM projects WHERE ProjectID = ( SELECT projectID FROM project_task_map WHERE TaskID = ?)";
+                PreparedStatement projectStatement = reader_connection.prepareStatement(sqlQueryTwo);
                 projectStatement.setInt(1, taskID);
                 ResultSet projectQueryResult = projectStatement.executeQuery();
 
+                parameterList = new ArrayList<>();
+                parameterList.add(taskID);
+                this.addStatement(sqlQueryTwo, parameterList);
                 while(projectQueryResult.next()){
                     EmployeeProject emp = new EmployeeProject(projectQueryResult.getString("projectname"), projectQueryResult.getInt("projectid"));
                     projTask.addMapping(emp, tk);
@@ -194,37 +199,36 @@ public class DB_Reader {
             /* Boiler plate to create class and establish connection */
 
             /* Prepares query to get task in row with null timeout*/
-            String query = "SELECT TaskID FROM time_logs WHERE TimeOut IS NULL AND EmployeeID = ?";
-            PreparedStatement stmt = reader_connection.prepareStatement(query);
+            String sqlQuery = "SELECT TaskID FROM time_logs WHERE TimeOut IS NULL AND EmployeeID = ?";
+            PreparedStatement stmt = reader_connection.prepareStatement(sqlQuery);
             stmt.setInt(1, employeeID);
 
             ResultSet queryRes = stmt.executeQuery();
 
+
+            ArrayList<Object> parameterList = new ArrayList<>();
+            parameterList.add(employeeID);
+            this.addStatement(sqlQuery, parameterList);
             if(queryRes.next())
                 ret[0] = queryRes.getInt("TaskID");
 
             /* Get project that has task as assigned task */
-            query = "SELECT ProjectID FROM project_task_map WHERE TaskID = ?";
-            stmt = reader_connection.prepareStatement(query);
+            sqlQuery = "SELECT ProjectID FROM project_task_map WHERE TaskID = ?";
+            stmt = reader_connection.prepareStatement(sqlQuery);
             stmt.setInt(1, ret[0]);
 
+            parameterList = new ArrayList<>();
+            parameterList.add(ret[0]);
+            this.addStatement(sqlQuery, parameterList);
             queryRes = stmt.executeQuery();
             if(queryRes.next())
                 ret[1] = queryRes.getInt("ProjectID");
-
             return ret;
-
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             return null;
         } finally {
             if (reader_connection != null)
-                try {
-                    reader_connection.close();
-                } catch (Exception e) { /* Ignore this I guess! */}
+                try { reader_connection.close(); } catch (Exception e) { /* Ignore this I guess! */}
         }
     }
 
@@ -247,28 +251,40 @@ public class DB_Reader {
             /* Boiler plate to create class and establish connection */
 
             /* Prepares query to get task in row with null timeout*/
-            String query;
-            if(projID == 0){
+            String sqlQuery;
+            if (projID == 0) {
                 /* Select all rows that for the employee */
-                query = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ?";
-            }else if(taskID == 0){
+                sqlQuery = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ?";
+            } else if (taskID == 0) {
                 /* Select all tasks associated with a given project */
-                query = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID IN ( SELECT TaskID FROM project_task_map WHERE ProjectID = ?)";
-            }else{
+                sqlQuery = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID IN ( SELECT TaskID FROM project_task_map WHERE ProjectID = ?)";
+            } else {
                 /* Select all logs for a given task and project */
-                query = "SELECT TimeIn, TimeOut, Date FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID = ?";
+                sqlQuery = "SELECT TimeIn, TimeOut, Date FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID = ?";
             }
 
             /* Prepare query and set parameters in accordance with function inputs */
+            ArrayList<Object> parameterList = new ArrayList<>();
+
             int index = 1;
-            PreparedStatement stmt = reader_connection.prepareStatement(query);
+            PreparedStatement stmt = reader_connection.prepareStatement(sqlQuery);
             stmt.setDate(index++, end);
+            parameterList.add(end);
+
             stmt.setDate(index++, start);
+            parameterList.add(start);
+
             stmt.setInt(index++, employeeNumber);
-            if(taskID == 0 && projID != 0)
+            parameterList.add(employeeNumber);
+
+            if (taskID == 0 && projID != 0) {
                 stmt.setInt(index++, projID);
-            else if(projID != 0)
+                parameterList.add(projID);
+            } else if (projID != 0){
                 stmt.setInt(index++, taskID);
+                parameterList.add(taskID);
+            }
+            this.addStatement(sqlQuery, parameterList);
 
             /* Execute and store query results */
             ResultSet queryRes = stmt.executeQuery();
@@ -285,17 +301,9 @@ public class DB_Reader {
             }
 
             return records;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
+        } catch (Exception e) {return null;
         } finally {
-            if (reader_connection != null)
-                try {
-                    reader_connection.close();
-                } catch (Exception e) { /* Ignore this I guess! */}
+            if (reader_connection != null) try { reader_connection.close(); } catch (Exception e) { /* Ignore this I guess! */}
         }
     }
 
@@ -313,6 +321,7 @@ public class DB_Reader {
      */
     public ArrayList<EmployeeLog> genManagerTimeSheet(int employeeNumber, int projID,  int taskID, Date start, Date end){
         ArrayList<EmployeeLog>  records = new ArrayList<>();
+        ArrayList<Object> parameterList = new ArrayList<>();
         try {
             /* Boiler plate to create class and establish connection */
             Class.forName("com.mysql.jdbc.Driver");
@@ -320,36 +329,43 @@ public class DB_Reader {
             /* Boiler plate to create class and establish connection */
 
             /* Prepares query to get task in row with null timeout*/
-            String query;
+            String sqlQuery;
             if(projID == 0 && employeeNumber != 0){
                 /* Select all rows that for the employee */
-                query = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ?";
+                sqlQuery = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ?";
             }else if(projID == 0 && employeeNumber == 0){
-                query = "SELECT TimeIn, TimeOut, Date, TaskID, EmployeeID FROM time_logs WHERE (Date BETWEEN ? AND ?)";
+                sqlQuery = "SELECT TimeIn, TimeOut, Date, TaskID, EmployeeID FROM time_logs WHERE (Date BETWEEN ? AND ?)";
             }else if(taskID == 0 && employeeNumber != 0){
                 /* Select all tasks associated with a given project */
-                query = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID IN ( SELECT TaskID FROM project_task_map WHERE ProjectID = ?)";
+                sqlQuery = "SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID IN ( SELECT TaskID FROM project_task_map WHERE ProjectID = ?)";
             }else if(taskID == 0 && employeeNumber == 0){
-                query = "SELECT TimeIn, TimeOut, Date, TaskID, EmployeeID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND TaskID IN ( SELECT TaskID FROM project_task_map WHERE ProjectID = ?)";
+                sqlQuery = "SELECT TimeIn, TimeOut, Date, TaskID, EmployeeID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND TaskID IN ( SELECT TaskID FROM project_task_map WHERE ProjectID = ?)";
             }else if (employeeNumber == 0){
                 /* Select all logs for a given task and project */
-                query = "SELECT TimeIn, TimeOut, Date, EmployeeID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND TaskID = ?";
+                sqlQuery = "SELECT TimeIn, TimeOut, Date, EmployeeID FROM time_logs WHERE (Date BETWEEN ? AND ?) AND TaskID = ?";
             }else{
-                query = "SELECT TimeIn, TimeOut, Date FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID = ?";
+                sqlQuery = "SELECT TimeIn, TimeOut, Date FROM time_logs WHERE (Date BETWEEN ? AND ?) AND EmployeeID = ? AND TaskID = ?";
             }
 
             /* Prepare query and set parameters in accordance with function inputs */
             int index = 1;
-            PreparedStatement stmt = reader_connection.prepareStatement(query);
+            PreparedStatement stmt = reader_connection.prepareStatement(sqlQuery);
             stmt.setDate(index++, end);
+            parameterList.add(end);
             stmt.setDate(index++, start);
-            if(employeeNumber != 0)
+            parameterList.add(start);
+            if(employeeNumber != 0) {
                 stmt.setInt(index++, employeeNumber);
-            if(taskID == 0 && projID != 0)
+                parameterList.add(employeeNumber);
+            } if(taskID == 0 && projID != 0) {
                 stmt.setInt(index++, projID);
-            else if(projID != 0)
+                parameterList.add(projID);
+            } else if(projID != 0) {
                 stmt.setInt(index++, taskID);
+                parameterList.add(taskID);
+            }
 
+            this.addStatement(sqlQuery, parameterList);
             /* Execute and store query results */
             ResultSet queryRes = stmt.executeQuery();
             while(queryRes.next()){
@@ -477,5 +493,30 @@ public class DB_Reader {
             if (reader_connection != null)
                 try { reader_connection.close(); } catch (Exception e) { /* Ignore this I guess! */}
         }
+    }
+
+    /* TESTING METHODS -- DO NOT USE OUTSIDE OF TESTING */
+
+    private void addStatement(String sqlStatement, ArrayList<Object> parameters){
+        int listIndex = 0;
+        StringBuilder str = new StringBuilder(sqlStatement);
+        for(int i = 0; i < str.length(); i ++)
+            if(str.charAt(i) == '?') {
+                str.replace(i, i+1, parameters.get(listIndex).toString());
+                if(parameters.size() <= listIndex + 1)
+                    break;
+                else
+                    listIndex ++;
+            }
+
+        this.sqlStatements.add(str.toString());
+    }
+
+    public ArrayList<String> returnStatements(){
+        return this.sqlStatements;
+    }
+
+    public void clearList(){
+        this.sqlStatements = new ArrayList<>();
     }
 }

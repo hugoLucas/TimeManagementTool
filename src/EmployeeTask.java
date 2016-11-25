@@ -1,4 +1,7 @@
 /**
+ * Object representation of a task present in the database. Primarily used to transport references
+ * to tasks from database reading and writing objects to the GUI.
+ *
  * Created by Hugo Lucas on 10/29/2016.
  */
 public class EmployeeTask {

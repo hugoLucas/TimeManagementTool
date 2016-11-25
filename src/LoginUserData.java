@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 
 /**
+ * Class handles the login process for a new user as well as few misc. functions
+ * needed to populate the GUI during the initial login process.
+ *
  * Created by Hugo Lucas on 11/18/2016.
  */
 public class LoginUserData {

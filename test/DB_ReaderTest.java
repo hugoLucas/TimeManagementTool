@@ -29,12 +29,16 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
     private MockResultSet resultOne;
     private MockResultSet resultTwo;
 
+    private DB_Reader testObj;
+
     @Before
     public void setUp() {
         this.connection = getJDBCMockObjectFactory().getMockConnection();
         this.statementHandler = connection.getPreparedStatementResultSetHandler();
         this.resultOne = statementHandler.createResultSet();
         this.resultTwo = statementHandler.createResultSet();
+
+        this.testObj = new DB_Reader();
     }
 
     @Test
@@ -49,7 +53,6 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
         this.resultOne.addRow(row);
         statementHandler.prepareResultSet("SELECT employee", resultOne);
 
-        DB_Reader testObj = new DB_Reader();
         int result [] = testObj.login_user("password","Hugo");
 
         assertEquals(1, result[0]);
@@ -71,7 +74,6 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
         this.resultOne.addRow(rowTwo);
         statementHandler.prepareResultSet("SELECT employee", resultOne);
 
-        DB_Reader testObj = new DB_Reader();
         int result [] = testObj.login_user("password","Hugo");
 
         assertEquals(1, result[0]);
@@ -89,12 +91,23 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
 
         statementHandler.prepareResultSet("SELECT employee", resultOne);
 
-        DB_Reader testObj = new DB_Reader();
         int result [] = testObj.login_user("password","Hugo");
 
         assertEquals(-1, result[0]);
         assertEquals(-1, result[1]);
         assertEquals(-1, result[2]);
+    }
+
+    @Test
+    public void checkSQLStatementForLogin () throws Exception {
+        statementHandler.prepareGlobalResultSet(this.resultOne);
+
+        testObj.login_user("PW", "UN");
+        ArrayList<String> result = testObj.returnStatements();
+
+        assertEquals("SELECT employee.employeeID, employee.Manager, " +
+                "employee.WorkStatus, login.Password FROM employee, " +
+                "login WHERE login.Username = UN", result.get(0));
     }
 
     @Test
@@ -108,7 +121,6 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
         resultOne.addRow(rowOne);
         statementHandler.prepareResultSet("SELECT EmployeeID", resultOne);
 
-        DB_Reader testObj = new DB_Reader();
         ArrayList<Employee> result = testObj.allEmployees();
 
         assertEquals(1, result.size());
@@ -129,7 +141,6 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
         resultOne.addRow(rowThree);
         statementHandler.prepareResultSet("SELECT EmployeeID", resultOne);
 
-        DB_Reader testObj = new DB_Reader();
         ArrayList<Employee> result = testObj.allEmployees();
 
         assertEquals(3, result.size());
@@ -138,7 +149,6 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
     @Test
     public void noEmployeesReturnListOfSizeZero() throws Exception {
         statementHandler.prepareGlobalResultSet(null);
-        DB_Reader testObj = new DB_Reader();
         ArrayList<Employee> result = testObj.allEmployees();
 
         assertEquals(0, result.size());
@@ -159,7 +169,6 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
         resultOne.addRow(rowThree);
         statementHandler.prepareResultSet("SELECT EmployeeID", resultOne);
 
-        DB_Reader testObj = new DB_Reader();
         ArrayList<Employee> result = testObj.allEmployees();
 
         assertEquals(0, result.size());
@@ -190,7 +199,6 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
         statementHandler.prepareResultSet("SELECT * FROM tasks", resultOne);
         statementHandler.prepareResultSet("SELECT * FROM projects", resultTwo);
 
-        DB_Reader testObj = new DB_Reader();
         EmployeeProjectTaskMap result = testObj.projectTaskMap(1);
 
         assertEquals(3, result.getProjects().size());
@@ -217,7 +225,6 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
         statementHandler.prepareResultSet("SELECT * FROM tasks", resultOne);
         statementHandler.prepareResultSet("SELECT * FROM projects", resultTwo);
 
-        DB_Reader testObj = new DB_Reader();
         EmployeeProjectTaskMap result = testObj.projectTaskMap(1);
 
         assertEquals(1, result.getProjects().size());
@@ -225,6 +232,43 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
                 .get(0).getProjectName()).size());
     }
 
+    @Test
+    public void checkSQLStatementsForProjectTaskMap () throws Exception {
+        this.resultOne.addColumn("TaskID");
+        this.resultOne.addColumn("TaskName");
+
+        this.resultTwo.addColumn("ProjectName");
+        this.resultTwo.addColumn("ProjectID");
+
+        Object rowOne[] = {1000, "Fix Bug"};
+        Object rowTwo[] = {3000, "Write Tests"};
+        Object rowThree[] = {2000, "Implement Feature"};
+        resultOne.addRow(rowOne);
+        resultOne.addRow(rowTwo);
+        resultOne.addRow(rowThree);
+
+        Object row1[] = {"TMT", 100};
+        resultTwo.addRow(row1);
+
+        statementHandler.prepareResultSet("SELECT * FROM tasks", resultOne);
+        statementHandler.prepareResultSet("SELECT * FROM projects", resultTwo);
+
+        this.testObj.projectTaskMap(1);
+        ArrayList<String> sqlStatements = testObj.returnStatements();
+
+        assertEquals("SELECT * FROM tasks WHERE tasks.TaskID IN " +
+                "(SELECT taskID FROM employee_task_map WHERE EmployeeID = 1)",
+                sqlStatements.get(0));
+        assertEquals("SELECT * FROM projects WHERE ProjectID = ( " +
+                        "SELECT projectID FROM project_task_map WHERE TaskID = 1000)",
+                sqlStatements.get(1));
+        assertEquals("SELECT * FROM projects WHERE ProjectID = ( " +
+                        "SELECT projectID FROM project_task_map WHERE TaskID = 3000)",
+                sqlStatements.get(2));
+        assertEquals("SELECT * FROM projects WHERE ProjectID = ( " +
+                        "SELECT projectID FROM project_task_map WHERE TaskID = 2000)",
+                sqlStatements.get(3));
+    }
 
     @Test
     public void oneMatchPerQueryReturnOneOne() throws Exception {
@@ -240,11 +284,33 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
         statementHandler.prepareResultSet("SELECT TaskID", resultOne);
         statementHandler.prepareResultSet("SELECT ProjectID", resultTwo);
 
-        DB_Reader testObj = new DB_Reader();
         int [] result = testObj.getCurrentEmployeeTaskAndProject(1);
 
         assertEquals(1, result[0]);
         assertEquals(1, result[1]);
+    }
+
+    @Test
+    public void checkSQLStatementsForGetCurrentEmployeeTaskAndProject(){
+        this.resultOne.addColumn("TaskID");
+        Object row11[] = {100};
+
+        this.resultTwo.addColumn("ProjectID");
+        Object row21[] = {1000};
+
+        resultOne.addRow(row11);
+        resultTwo.addRow(row21);
+
+        statementHandler.prepareResultSet("SELECT TaskID", resultOne);
+        statementHandler.prepareResultSet("SELECT ProjectID", resultTwo);
+
+        testObj.getCurrentEmployeeTaskAndProject(1);
+        ArrayList<String> sqlStatements = testObj.returnStatements();
+
+        assertEquals("SELECT TaskID FROM time_logs WHERE TimeOut IS NULL " +
+                "AND EmployeeID = 1", sqlStatements.get(0));
+        assertEquals("SELECT ProjectID FROM project_task_map WHERE TaskID = 100",
+                sqlStatements.get(1));
     }
 
     @Test
@@ -269,7 +335,6 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
         statementHandler.prepareResultSet("SELECT TaskID", resultOne);
         statementHandler.prepareResultSet("SELECT ProjectID", resultTwo);
 
-        DB_Reader testObj = new DB_Reader();
         int [] result = testObj.getCurrentEmployeeTaskAndProject(1);
 
         assertEquals(1, result[0]);
@@ -281,10 +346,91 @@ public class DB_ReaderTest extends BasicJDBCTestCaseAdapter {
         statementHandler.prepareResultSet("SELECT TaskID", resultOne);
         statementHandler.prepareResultSet("SELECT ProjectID", resultTwo);
 
-        DB_Reader testObj = new DB_Reader();
         int [] result = testObj.getCurrentEmployeeTaskAndProject(1);
 
         assertEquals(0, result[0]);
         assertEquals(0, result[1]);
+    }
+
+    @Test
+    public void checkSQInGenEmployeeTimeSheet() throws Exception {
+        statementHandler.prepareGlobalResultSet(resultOne);
+        Date end = new Date(System.currentTimeMillis());
+        Date start = new Date(System.currentTimeMillis()-600000000);
+
+        testObj.genEmployeeTimeSheet(1, 1000, 100, start, end);
+        ArrayList<String> sqlStatements = testObj.returnStatements();
+        assertEquals("SELECT TimeIn, TimeOut, Date FROM time_logs WHERE " +
+                "(Date BETWEEN 2016-11-24 AND 2016-11-17) AND EmployeeID = 1 " +
+                "AND TaskID = 100", sqlStatements.get(0));
+        testObj.clearList();
+
+        testObj.genEmployeeTimeSheet(1, 0, 0, start, end);
+        sqlStatements = testObj.returnStatements();
+        assertEquals("SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE " +
+                "(Date BETWEEN 2016-11-24 AND 2016-11-17) AND EmployeeID = 1",
+                sqlStatements.get(0));
+        testObj.clearList();
+
+        testObj.genEmployeeTimeSheet(1, 1000, 0, start, end);
+        sqlStatements = testObj.returnStatements();
+        assertEquals("SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs WHERE " +
+                "(Date BETWEEN 2016-11-24 AND 2016-11-17) AND EmployeeID = 1 AND " +
+                "TaskID IN ( SELECT TaskID FROM project_task_map WHERE ProjectID = 1000)",
+                sqlStatements.get(0));
+    }
+
+    @Test
+    public void checkSQLInGenManagerTimeSheet() throws Exception {
+        statementHandler.prepareGlobalResultSet(resultOne);
+        Date end = new Date(System.currentTimeMillis());
+        Date start = new Date(System.currentTimeMillis()-600000000);
+
+        testObj.genManagerTimeSheet(1, 1000, 100, start, end);
+        ArrayList<String> sqlStatements = testObj.returnStatements();
+        assertEquals("SELECT TimeIn, TimeOut, Date FROM time_logs WHERE " +
+                "(Date BETWEEN 2016-11-24 AND 2016-11-17) AND EmployeeID = 1 " +
+                "AND TaskID = 100", sqlStatements.get(0));
+        testObj.clearList();
+
+        testObj.genManagerTimeSheet(1, 0, 100, start, end);
+        sqlStatements = testObj.returnStatements();
+        assertEquals("SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs " +
+                "WHERE (Date BETWEEN 2016-11-24 AND 2016-11-17) AND EmployeeID = 1",
+                sqlStatements.get(0));
+        testObj.clearList();
+
+        testObj.genManagerTimeSheet(0, 0, 100, start, end);
+        sqlStatements = testObj.returnStatements();
+        assertEquals("SELECT TimeIn, TimeOut, Date, TaskID, EmployeeID FROM time_logs " +
+                "WHERE (Date BETWEEN 2016-11-24 AND 2016-11-17)",
+                sqlStatements.get(0));
+        testObj.clearList();
+
+
+        testObj.genManagerTimeSheet(1, 1000, 0, start, end);
+        sqlStatements = testObj.returnStatements();
+        assertEquals("SELECT TimeIn, TimeOut, Date, TaskID FROM time_logs " +
+                        "WHERE (Date BETWEEN 2016-11-24 AND 2016-11-17) AND " +
+                        "EmployeeID = 1 AND TaskID IN ( SELECT TaskID FROM " +
+                        "project_task_map WHERE ProjectID = 1000)",
+                sqlStatements.get(0));
+        testObj.clearList();
+
+        testObj.genManagerTimeSheet(0, 1000, 0, start, end);
+        sqlStatements = testObj.returnStatements();
+        assertEquals("SELECT TimeIn, TimeOut, Date, TaskID, EmployeeID FROM time_logs " +
+                        "WHERE (Date BETWEEN 2016-11-24 AND 2016-11-17) AND " +
+                        "TaskID IN ( SELECT TaskID FROM project_task_map WHERE " +
+                        "ProjectID = 1000)",
+                sqlStatements.get(0));
+        testObj.clearList();
+
+        testObj.genManagerTimeSheet(0, 1000, 100, start, end);
+        sqlStatements = testObj.returnStatements();
+        assertEquals("SELECT TimeIn, TimeOut, Date, EmployeeID FROM time_logs WHERE " +
+                        "(Date BETWEEN 2016-11-24 AND 2016-11-17) AND TaskID = 100",
+                sqlStatements.get(0));
+        testObj.clearList();
     }
 }
