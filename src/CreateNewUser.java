@@ -4,6 +4,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 /**
+ * This class handles the creation of a new user login. Once an employee is added to
+ * the system, they cannot login as they do not have a valid username and password.
+ * This class is invoked whenever such an employee tries to log in to the system for
+ * the first time. Using their identifying information, they are able to create
+ * a username and password of their choosing. If a non-new employee tries to use this
+ * class they will be rejected as they already have a username and password.
+ *
  * Created by Hugo on 11/10/2016.
  */
 public class CreateNewUser {

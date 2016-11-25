@@ -1,6 +1,7 @@
 import java.sql.*;
 
 /**
+ * This class handles all of the writing/transfer of information from the GUI to the database.
  * Created by Hugo Lucas on 11/4/2016.
  */
 public class DB_Writer {

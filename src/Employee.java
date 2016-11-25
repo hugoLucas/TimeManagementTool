@@ -1,4 +1,8 @@
 /**
+ * This class handles the collection of all relevant information for an Employee in the database.
+ * This class is utilised to create lists of Employees in order to efficiently pass those Employees
+ * to other classes/methods.
+ *
  * Created by Hugo Lucas on 10/29/2016.
  */
 public class Employee {
