@@ -68,7 +68,7 @@ public class GenTimeSheetTest {
         ArrayList<Object> results = testObj.returnAllFields();
 
         assertEquals("2016-11-20", results.get(6).toString());
-        assertEquals("2016-11-23", results.get(5).toString());
+        assertEquals("2016-11-24", results.get(5).toString());
 
         this.testObj = new GenTimeSheet(this.rankStatus, this.employeeID,
                 this.projectID, this.taskID, "Current Month");
@@ -76,7 +76,7 @@ public class GenTimeSheetTest {
         results = testObj.returnAllFields();
 
         assertEquals("2016-11-01", results.get(6).toString());
-        assertEquals("2016-11-23", results.get(5).toString());
+        assertEquals("2016-11-24", results.get(5).toString());
 
         this.testObj = new GenTimeSheet(this.rankStatus, this.employeeID,
                 this.projectID, this.taskID, "Current Year");
@@ -84,7 +84,7 @@ public class GenTimeSheetTest {
         results = testObj.returnAllFields();
 
         assertEquals("2016-01-01", results.get(6).toString());
-        assertEquals("2016-11-23", results.get(5).toString());
+        assertEquals("2016-11-24", results.get(5).toString());
     }
 
     @Test

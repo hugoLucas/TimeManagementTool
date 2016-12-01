@@ -62,6 +62,12 @@ public class LoginUserData {
         return reader.projectTaskMap(employeeNumber);
     }
 
+
+    /**
+     * Returns a list of all employees in the system
+     *
+     * @return  list of all employees
+     */
     public ArrayList<Employee> getAllEmployees(){
         DB_Reader reader = new DB_Reader();
 
@@ -94,5 +100,11 @@ public class LoginUserData {
             if (e.getName().equals(name))
                 return e.getEmployeeNumber();
         return -1;
+    }
+
+    public ArrayList<EmployeeProject> getAllProjects(){
+        DB_Reader reader = new DB_Reader();
+        ArrayList<EmployeeProject> projectList = reader.allProjects();
+        return projectList;
     }
 }

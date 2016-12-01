@@ -118,7 +118,7 @@ public class GUI_Layout extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
         setLocationRelativeTo(null);
-        setSize(400,250);
+        setSize(400,300);
         setResizable(false);
         setVisible(true);
 
@@ -373,9 +373,10 @@ public class GUI_Layout extends JFrame{
                 clockedInOrOut = nextScreenName;
                 setClock(timeLabel);
 
+                /* Clock-In Screen Check */
                 if (authenticationResult[1] == 0) {
                     if(authenticationResult[2] != 0)
-                        setSize(400, 300);
+                        setSize(400,330); /* Clocked-In Manager */
 
                     setClockInDropdowns();
                 } else {
@@ -385,7 +386,9 @@ public class GUI_Layout extends JFrame{
                             PROJECT_TASK_MAPPING.getTaskName(taskProjectIDNumbers[0]));
 
                     if(authenticationResult[2] == 0)
-                        setSize(400, 350);
+                        setSize(400, 250);
+                    else
+                        setSize(400, 320);
                 }
             }
         }
@@ -417,13 +420,14 @@ public class GUI_Layout extends JFrame{
                 taskSelected = (String) clockInManTaskSelector.getSelectedItem();
                 clockLabel = clockOutManTimer;
                 panelName = "ClockOutMan";
+                setSize(400, 350);
             }
 
             ClockInUser clockInUser = new ClockInUser(EMPLOYEE_ID, PROJECT_TASK_MAPPING.getTaskID(taskSelected));
             boolean result = clockInUser.clockIn();
             if(result) {
                 destroyClock();
-
+                setClock(clockLabel);
                 prepClockOutScreen(projectSelected, taskSelected);
                 setClock(clockLabel);
                 layout.show(cardStack, panelName);
@@ -447,6 +451,8 @@ public class GUI_Layout extends JFrame{
             CardLayout layout = (CardLayout) (cardStack.getLayout());
             String taskSelected = "";
             String screeName = "";
+
+            destroyClock();
             if(e.getSource() == clockOutDevClockOutButton){
                 taskSelected = clockOutDevCurrentTask.getText();
                 setClock(clockinDevTimer);
@@ -461,7 +467,6 @@ public class GUI_Layout extends JFrame{
             boolean result = clockOutUser.clockOut();
 
             if (result) {
-                destroyClock();
                 setClockInDropdowns();
                 layout.show(cardStack, screeName);
                 clockedInOrOut = screeName;
@@ -511,10 +516,10 @@ public class GUI_Layout extends JFrame{
                 setSize(400,250);
             }else if (EMPLOYEE_RANK == 0) {
                 layout.show(cardStack, clockedInOrOut);
-                setSize(400,250);
+                setSize(400,300);
             } else if( EMPLOYEE_RANK == 1){
                 layout.show(cardStack,clockedInOrOut);
-                setSize(400,300);
+                setSize(400,330);
             }
         }
     }
@@ -603,7 +608,7 @@ public class GUI_Layout extends JFrame{
                 }
             });
 
-            for(EmployeeProject p: PROJECT_TASK_MAPPING.getProjects())
+            for(EmployeeProject p: LOGIN_HANDLER.getAllProjects())
                 systemManATProjectSelector.addItem(p.getProjectName());
 
             systemManATAddTask.addActionListener(new AddTaskListener());

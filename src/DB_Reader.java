@@ -495,6 +495,31 @@ public class DB_Reader {
         }
     }
 
+    public ArrayList<EmployeeProject> allProjects(){
+        ArrayList<EmployeeProject> projectList = new ArrayList<>();
+        try {
+            /* Boiler plate to create class and establish connection */
+            Class.forName("com.mysql.jdbc.Driver");
+            this.reader_connection = DriverManager.getConnection(url, db_username, db_password);
+            /* Boiler plate to create class and establish connection */
+
+            String taskQuery = "SELECT * FROM projects";
+            PreparedStatement taskStmt = reader_connection.prepareStatement(taskQuery);
+            ResultSet taskSet = taskStmt.executeQuery();
+
+            while(taskSet.next())
+                projectList.add(new EmployeeProject(taskSet.getString("ProjectName"), taskSet.getInt("ProjectID")));
+
+            return projectList;
+
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (reader_connection != null)
+                try { reader_connection.close(); } catch (Exception e) { /* Ignore this I guess! */}
+        }
+    }
+
     /* TESTING METHODS -- DO NOT USE OUTSIDE OF TESTING */
 
     private void addStatement(String sqlStatement, ArrayList<Object> parameters){

@@ -38,7 +38,7 @@ public class ClockOutUser {
         if(this.employeeID > 0 && this.taskID > 0) {
             DB_Writer writer = new DB_Writer();
             if (writer.clockOutUser(employeeID, taskID))
-                return writer.setWorkStatus(employeeID, 1);
+                return writer.setWorkStatus(employeeID, 0);
         }
         return false;
     }
